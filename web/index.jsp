@@ -10,6 +10,7 @@
   <head>
     <title>$Title$</title>
   </head>
+  <p></p>
   <body>
   $END$
   </body>
