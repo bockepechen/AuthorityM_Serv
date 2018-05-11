@@ -8,7 +8,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <html>
   <head>
-    <title>"test gitgub1"</title>
+    <title>"test gitgub"</title>
   </head>
   <p></p>
   <p></p>
