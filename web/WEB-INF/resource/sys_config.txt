@@ -1,0 +1,5 @@
+driverClass=com.microsoft.sqlserver.jdbc.SQLServerDriver
+jdbcUrl_auth=jdbc:sqlserver://10.2.0.3:1433;DatabaseName=AuthManageDB
+user=sa
+password=123.com
+#devMode=true
