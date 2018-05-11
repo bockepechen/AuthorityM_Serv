@@ -11,6 +11,7 @@
     <title>$Title$</title>
   </head>
   <p></p>
+  <p></p>
   <body>
   $END$
   </body>
