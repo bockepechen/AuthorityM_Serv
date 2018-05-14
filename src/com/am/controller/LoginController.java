@@ -12,9 +12,7 @@ import com.jfinal.log.Log;
 public class LoginController extends Controller {
  	static Log log = Log.getLog(LoginController.class);
 
- 	public  void index(){
 
-	}
 
 
 }
