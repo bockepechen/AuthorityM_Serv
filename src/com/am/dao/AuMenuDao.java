@@ -43,7 +43,7 @@ public class AuMenuDao implements  IBaseDao {
 	 * @return
 	 */
 	public List<Record> queryMenu(String roleId, String orgId){
-		String sql = "SELECT m.MU_ID,m.MU_NAME  FROM AU_MENU m LEFT JOIN AU_MENUORG mo ON mo.MU_ID = m.MU_ID  WHERE mo.ORG_ID = ? AND mo.RL_ID =?";
+		String sql = "SELECT m.MU_ID AS menu_id,m.MU_NAME AS menu_name,m.MU_ACTION AS menu_action FROM AU_MENU m LEFT JOIN AU_MENUORG mo ON mo.MU_ID = m.MU_ID  WHERE mo.ORG_ID = ? AND mo.RL_ID =?";
 		return Db.use(configName).find(sql,roleId,orgId);
 	}
 }

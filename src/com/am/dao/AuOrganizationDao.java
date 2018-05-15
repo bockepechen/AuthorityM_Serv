@@ -31,7 +31,7 @@ public class AuOrganizationDao implements IBaseDao {
 
 	@Override
 	public List<Record> findAll() {
-		String sql = "SELECT * FROM AU_ORGANIZATION";
+		String sql = "SELECT o.ORG_ID AS org_id,o.ORG_CODE AS org_code,o.ORG_NAME AS org_name FROM AU_ORGANIZATION o";
 		return Db.use(configName).find(sql);
 	}
 }

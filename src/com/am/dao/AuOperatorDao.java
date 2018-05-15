@@ -34,8 +34,17 @@ public class AuOperatorDao implements IBaseDao{
 
 	@Override
 	public List<Record> findAll() {
-		String sql = "SELECT * FROM AU_OPERATOR";
+		String sql = "SELECT ot.OP_OPRATORID AS operator_id , ot.OP_ACCOUNT AS account, ot.OP_NAME AS name FROM AU_OPERATOR ot";
 		return Db.use(configName).find(sql);
+	}
+
+	/**
+	 * 根据主键查询信息
+	 * @param id
+	 * @return
+	 */
+	public Record findById(String id){
+		return Db.use(configName).findById(tableName,primaryKey,id);
 	}
 
 	/**
@@ -50,12 +59,12 @@ public class AuOperatorDao implements IBaseDao{
 	}
 
 	/**
-	 * 查询用户所属哪些机构
+	 * 查询用户所属哪些机构及角色
 	 * @param operatorId
 	 * @return
 	 */
 	public List<Record> queryOrgByOperatorId(String operatorId){
-		String sql  = "SELECT ORG_ID,ORG_NAME FROM AU_ORGANIZATION o LEFT JOIN AU_EMPORG eo ON o.ORG_ID = eo.ORG_ID WHERE eo.OP_OPRATORID = ?";
+		String sql  = "SELECT o.ORG_ID AS org_id,o.ORG_NAME AS org_name,r.RL_ID AS role_id,r.RL_NAME AS role_name FROM AU_ORGANIZATION o LEFT JOIN AU_EMPORG eo ON o.ORG_ID = eo.ORG_ID LEFT JOIN AU_ROLE r ON eo.RL_ID = r.RL_ID WHERE eo.OP_OPRATORID = ?";
 		return Db.use(configName).find(sql,operatorId);
 	}
 }

@@ -54,14 +54,15 @@ public class JsonUtil {
 			map.put(k.toString(), v);
 		}
 		Map<String, Object> map2 = new Hashtable<String, Object>();
-		JSONObject AddDataJson = JSONObject.fromObject(map.get("jyam_content").toString());
+		JSONObject AddDataJson = JSONObject.fromObject(map.get("jyau_content").toString());
 		for (Object k : AddDataJson.keySet()) {
 			Object v = AddDataJson.get(k);
-			if(k.toString() == "jyam_sign" || k.toString().equals("jyam_sign")){
+			if(k.toString() == "jyau_sign" || k.toString().equals("jyau_sign")){
 				map.put(k.toString(), v);
 			}
 			map2.put(k.toString(), v);
 		}
+
 		//第二层解析 第二层可能是 也可能不是
 		for(Map.Entry<String, Object> entry:map2.entrySet()){
 			try {
@@ -82,10 +83,10 @@ public class JsonUtil {
 			}
 		}
 
-		JSONObject pubDataJson = JSONObject.fromObject(map.get("jyam_pubData").toString());
-		map.put("phone_num", pubDataJson.getString("phone_num"));
+		JSONObject pubDataJson = JSONObject.fromObject(map.get("jyau_pubData").toString());
 		map.put("system_id", pubDataJson.getString("system_id"));
-		map.put("ip", pubDataJson.getString("ip"));
+		map.put("ip_address", pubDataJson.getString("ip_address"));
+		map.put("account_id", pubDataJson.getString("account_id"));
 		if(pubDataJson.containsKey("operator_id")){
 			map.put("operator_id", pubDataJson.getString("operator_id"));
 		}
@@ -102,18 +103,18 @@ public class JsonUtil {
 	 */
 	public static com.alibaba.fastjson.JSONObject returnJson(com.alibaba.fastjson.JSONArray resData,
 													  String returnCode,String returnMsg){
-		//存放【jyam_resData】，【jyam_resHead】
+		//存放【jyau_resData】，【jyau_resHead】
 		com.alibaba.fastjson.JSONObject jsonObject = new com.alibaba.fastjson.JSONObject();
-		//存放【jyam_content】
-		com.alibaba.fastjson.JSONObject jyam_content = new com.alibaba.fastjson.JSONObject();
-		com.alibaba.fastjson.JSONObject jyam_resHead = new com.alibaba.fastjson.JSONObject();
-		//组装jycl_resHead
-		jyam_resHead.put("return_code",returnCode);
-		jyam_resHead.put("return_msg",returnMsg);
-		jsonObject.put("jyam_resData", resData);
-		jsonObject.put("jyam_resHead", jyam_resHead);
-		jyam_content.put("jyam_content", jsonObject);
-		return jyam_content;
+		//存放【jyau_content】
+		com.alibaba.fastjson.JSONObject jyau_content = new com.alibaba.fastjson.JSONObject();
+		com.alibaba.fastjson.JSONObject jyau_resHead = new com.alibaba.fastjson.JSONObject();
+		//组装jyau_resHead
+		jyau_resHead.put("return_code",returnCode);
+		jyau_resHead.put("return_msg",returnMsg);
+		jsonObject.put("jyau_resData", resData);
+		jsonObject.put("jyau_resHead", jyau_resHead);
+		jyau_content.put("jyau_content", jsonObject);
+		return jyau_content;
 
 	}
 

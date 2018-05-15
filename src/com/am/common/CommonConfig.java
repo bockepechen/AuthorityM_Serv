@@ -2,6 +2,8 @@ package com.am.common;
 
 import com.alibaba.druid.filter.stat.StatFilter;
 import com.alibaba.druid.wall.WallFilter;
+import com.am.controller.*;
+import com.am.utils.EhCacheUtil;
 import com.jfinal.config.*;
 import com.jfinal.kit.PathKit;
 import com.jfinal.kit.PropKit;
@@ -80,7 +82,8 @@ public class CommonConfig extends JFinalConfig {
 	 */
 	public void configRoute(Routes me) {
 		// 入口路由
-		//me.add("/login", LoginController.class);
+		me.add("/login", LoginController.class);
+		me.add("/operator", OperatorController.class);
 
 	}
 
@@ -127,6 +130,6 @@ public class CommonConfig extends JFinalConfig {
 	 */
 	public void afterJFinalStart() {
 		// 加载数据缓存
-		//EhCacheUtil.loadCache();
+		EhCacheUtil.loadCache();
 	}
 }
