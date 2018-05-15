@@ -48,6 +48,15 @@ public class AuOperatorDao implements IBaseDao{
 	}
 
 	/**
+	 * 根据主键删除信息
+	 * @param id
+	 * @return
+	 */
+	public boolean deleteById(String id){
+		return Db.use(configName).deleteById(tableName,primaryKey,id);
+	}
+
+	/**
 	 * 根据登录账号和密码查询
 	 * @param accountId
 	 * @param pwd

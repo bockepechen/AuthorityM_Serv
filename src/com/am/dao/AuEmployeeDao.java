@@ -34,4 +34,14 @@ public class AuEmployeeDao implements  IBaseDao{
 		String sql = "SELECT * FROM AU_EMPLOYEE";
 		return Db.use(configName).find(sql);
 	}
+
+	/**
+	 * 根据操作编号查询员工信息
+	 * @param operatorId
+	 * @return
+	 */
+	public  Record findByOperatorId(String operatorId){
+		String sql = "SELECT * FROM  AU_EMPLOYEE  WHERE OP_OPRATORID = ? ";
+		return Db.use(configName).findFirst(sql,operatorId);
+	}
 }

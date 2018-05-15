@@ -2,11 +2,8 @@ package com.am.controller;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.am.dao.AuOperatorDao;
-import com.am.utils.EmptyUtils;
-import com.am.utils.JsonUtil;
-import com.am.utils.PubModelUtil;
-import com.am.utils.ReturnCodeUtil;
+import com.am.service.LoginService;
+import com.am.utils.*;
 import com.jfinal.core.Controller;
 import com.jfinal.kit.HttpKit;
 import com.jfinal.log.Log;
@@ -27,6 +24,9 @@ public class LoginController extends Controller {
 	String operatorId = "";//用户编号
 	String accountId = "";//登录账号
 	String pwd = "";//账户密码
+	String ip = "";//当前IP
+	String lastIp = "";//上次登录Ip
+	String lastLogin = "";//上次登录时间
 	String reqNo = "";//请求单号
 	String returnCode = "";//返回码
 	String returnMessage = "";//返回信息
@@ -42,16 +42,15 @@ public class LoginController extends Controller {
 		//获取请求数据
 		String json = HttpKit.readData(getRequest());
 
-/*		String json = "{\n" +
+		/*String json = "{\n" +
 				"\n" +
 				"\t\"jyau_content\": {\n" +
 				"\t\t\"jyau_reqData\": [{\n" +
 				"\t\t\t\"req_no\": \" AU001201810231521335687\",\n" +
-				"\t\t\t\"account_id\": \"systemman\",\n" +
 				"\t\t\t\"account_pwd\": \"6fdefAERTYP\"\n" +
 				"\t\t}],\n" +
 				"\t\t\"jyau_pubData\": {\n" +
-				"\t\t\t\"oprator_id\": \"\",\n" +
+				"\t\t\t\"operator_id\": \"\",\n" +
 				"\t\t\t\"account_id\": \"systemman\",\n" +
 				"\t\t\t\"ip_address\": \"10.2.0.116\",\n" +
 				"\t\t\t\"system_id\": \"10909\"\n" +
@@ -65,17 +64,21 @@ public class LoginController extends Controller {
 			reqNo = map.get("req_no").toString();
 			accountId = map.get("account_id").toString();
 			pwd = map.get("account_pwd").toString();
+			ip = map.get("ip_address").toString();
 			if(EmptyUtils.isEmpty(reqNo) || EmptyUtils.isEmpty(accountId) || EmptyUtils.isEmpty(pwd)){
 				returnCode = ReturnCodeUtil.returnCode3;
 			}else {
-				Record auopRecord = AuOperatorDao.dao.queryByaccountIdPwd(accountId, pwd);
-				if (null != auopRecord) {
-					operatorId = auopRecord.getStr("OP_OPRATORID");
-					orgList = AuOperatorDao.dao.queryOrgByOperatorId(operatorId);
-					returnCode = ReturnCodeUtil.returnCode;
-				} else {
-					returnCode = ReturnCodeUtil.returnCode1;
+				//调用登录业务逻辑
+				Map loginMap = LoginService.service.loginBiz(accountId,pwd,ip);
+				operatorId = loginMap.get("operatorId").toString();
+				if(null != loginMap.get("lastIp")){
+					lastIp = loginMap.get("lastIp").toString();
 				}
+				if(null != loginMap.get("lastLogin")){
+					lastLogin = loginMap.get("lastLogin").toString();
+				}
+				orgList = (List<Record>) loginMap.get("orgList");
+				returnCode = loginMap.get("returnCode").toString();
 			}
 			returnJson();
 		} catch (Exception e) {
@@ -91,6 +94,8 @@ public class LoginController extends Controller {
 		returnMessage = JsonUtil.getDictName(dictList, returnCode);
 		jyau_loginData.put("req_no", reqNo);
 		jyau_loginData.put("operator_id", operatorId);
+		jyau_loginData.put("last_ip", lastIp);
+		jyau_loginData.put("last_login", lastLogin);
 		jyau_loginData.put("org_list", orgList);
 		jsonArray.add(jyau_loginData);
 		jb = JsonUtil.returnJson(jsonArray, returnCode, returnMessage);
