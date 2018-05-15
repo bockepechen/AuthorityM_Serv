@@ -1,2 +1,4 @@
 # 返回码
 s_dict_returncode = SELECT DICTID, DICTNAME FROM AU_DICT_ENTRY WHERE DICTTYPEID = 'dict_returncode' ORDER BY DICTID
+# 用户状态
+s_dict_operatorStatus = SELECT DICTID, DICTNAME FROM AU_DICT_ENTRY WHERE DICTTYPEID = 'dict_operatorStatus' ORDER BY DICTID
