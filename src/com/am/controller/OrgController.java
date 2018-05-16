@@ -26,6 +26,7 @@ public class OrgController extends Controller {
 	String reqNo = "";// 请求单号
 	String operatorId = "";// 用户编号
 	String accountId = "";// 登录账号
+	String orgId = ""; // 机构ID
 
 	List<Record> orgList = null;// 查询到的所有机构
 	JSONArray orgArray = new JSONArray(); // 返回机构listJson
@@ -42,8 +43,8 @@ public class OrgController extends Controller {
 	 */
 	public void index(){
 		//获取请求数据
-		// String json = HttpKit.readData(getRequest());
-		String json = "{\n" +
+		String json = HttpKit.readData(getRequest());
+		/*String json = "{\n" +
 				"  \"jyau_content\": {\n" +
 				"    \"jyau_reqData\": [\n" +
 				"      {\n" +
@@ -57,7 +58,7 @@ public class OrgController extends Controller {
 				"      \"system_id\": \"10909\"\n" +
 				"    }\n" +
 				"  }\n" +
-				"}";
+				"}";*/
 		//解析Json
 		Map map = new HashMap();
 		try{
@@ -103,8 +104,8 @@ public class OrgController extends Controller {
 	 */
 	public void saveOrg(){
 		//获取请求数据
-		// String json = HttpKit.readData(getRequest());
-		String json = "{\n" +
+		String json = HttpKit.readData(getRequest());
+		/*String json = "{\n" +
 				"  \"jyau_content\": {\n" +
 				"    \"jyau_reqData\": [\n" +
 				"      {\n" +
@@ -121,7 +122,7 @@ public class OrgController extends Controller {
 				"      \"system_id\": \"10909\"\n" +
 				"    }\n" +
 				"  }\n" +
-				"}";
+				"}";*/
 		//解析Json
 		Map map = new HashMap();
 		try {
@@ -129,11 +130,11 @@ public class OrgController extends Controller {
 			reqNo = map.get("req_no").toString();
 			accountId = map.get("account_id").toString();
 			operatorId = map.get("operator_id").toString();
+			orgId = map.get("org_id").toString();
 
 			if(EmptyUtils.isEmpty(reqNo) || EmptyUtils.isEmpty(accountId) || EmptyUtils.isEmpty(operatorId)){
 				returnCode = ReturnCodeUtil.returnCode3;
 			}else {
-				String orgId = map.get("org_id").toString();
 				String orgCode = map.get("org_code").toString();
 				String orgName = map.get("org_name").toString();
 				Record orgRecord = new Record();
@@ -173,7 +174,12 @@ public class OrgController extends Controller {
 			returnCode = ReturnCodeUtil.returnCode2;
 			returnOperJson();
 		}finally {
-			PubModelUtil.apiRecordBean(map,"AU003",json,jb.toString());
+			if(EmptyUtils.isEmpty(orgId)){
+				PubModelUtil.apiRecordBean(map,"AU00301",json,jb.toString());
+			}else{
+				PubModelUtil.apiRecordBean(map,"AU00302",json,jb.toString());
+			}
+
 		}
 
 	}
@@ -183,7 +189,52 @@ public class OrgController extends Controller {
 	 */
 	public void delOrg(){
 		//获取请求数据
-		String json = HttpKit.readData(getRequest());
+		// String json = HttpKit.readData(getRequest());
+		String json = "{\n" +
+				"  \"jyau_content\": {\n" +
+				"    \"jyau_reqData\": [\n" +
+				"      {\n" +
+				"        \"req_no\": \"AU004201802051125231351\",\n" +
+				"        \"org_id\": \"3\"\n" +
+				"      }\n" +
+				"    ],\n" +
+				"    \"jyau_pubData\": {\n" +
+				"      \"operator_id\": \"1\",\n" +
+				"      \"ip_address\": \"10.2.0.116\",\n" +
+				"      \"account_id\": \"systemman\",\n" +
+				"      \"system_id\": \"10909\"\n" +
+				"    }\n" +
+				"  }\n" +
+				"}";
+		//解析Json
+		Map map = new HashMap();
+		try {
+			map = JsonUtil.analyzejson(json);
+			reqNo = map.get("req_no").toString();
+			accountId = map.get("account_id").toString();
+			operatorId = map.get("operator_id").toString();
+			orgId = map.get("org_id").toString();
+
+			if(EmptyUtils.isEmpty(reqNo) || EmptyUtils.isEmpty(accountId) || EmptyUtils.isEmpty(operatorId) || EmptyUtils.isEmpty(orgId)){
+				returnCode = ReturnCodeUtil.returnCode3;
+			}else {
+				Record delOrg = new Record();
+				delOrg.set("ORG_ID",orgId);
+				boolean delRecord = AuOrganizationDao.dao.delete(delOrg);
+				if(delRecord){
+					returnCode = ReturnCodeUtil.returnCode;
+				}else {
+					returnCode = ReturnCodeUtil.returnCode6;
+				}
+			}
+			returnOperJson();
+		}catch (Exception e){
+			log.error(e.getMessage(), e);
+			returnCode = ReturnCodeUtil.returnCode2;
+			returnOperJson();
+		}finally {
+			PubModelUtil.apiRecordBean(map,"AU004",json,jb.toString());
+		}
 
 	}
 
