@@ -189,8 +189,8 @@ public class OrgController extends Controller {
 	 */
 	public void delOrg(){
 		//获取请求数据
-		// String json = HttpKit.readData(getRequest());
-		String json = "{\n" +
+		String json = HttpKit.readData(getRequest());
+		/*String json = "{\n" +
 				"  \"jyau_content\": {\n" +
 				"    \"jyau_reqData\": [\n" +
 				"      {\n" +
@@ -205,7 +205,7 @@ public class OrgController extends Controller {
 				"      \"system_id\": \"10909\"\n" +
 				"    }\n" +
 				"  }\n" +
-				"}";
+				"}";*/
 		//解析Json
 		Map map = new HashMap();
 		try {
