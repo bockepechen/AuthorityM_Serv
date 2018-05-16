@@ -10,7 +10,9 @@ public class  ReturnCodeUtil {
 	public  static String returnCode1 = "0001";//登录失败
 	public  static String returnCode2 = "9999";//请求异常
 	public  static String returnCode3 = "9998";//数据格式不正确
+	public  static String returnCode4 = "0002";//当前系统无该用户
 	static Log log = Log.getLog(ReturnCodeUtil.class);
+
 
 
 

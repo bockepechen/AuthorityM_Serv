@@ -84,6 +84,7 @@ public class CommonConfig extends JFinalConfig {
 		// 入口路由
 		me.add("/login", LoginController.class);
 		me.add("/operator", OperatorController.class);
+		me.add("/emporg", OrgEmpManageController.class);
 
 	}
 
