@@ -83,7 +83,7 @@ public class LoginController extends Controller {
 			returnJson();
 		} catch (Exception e) {
 			log.error(e.getMessage(), e);
-			returnCode = "9999";
+			returnCode = ReturnCodeUtil.returnCode2;
 			returnJson();
 		} finally {
 			PubModelUtil.apiRecordBean(map,"AU001",json,jb.toString());
