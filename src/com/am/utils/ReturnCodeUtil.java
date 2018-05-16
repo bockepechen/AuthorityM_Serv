@@ -12,6 +12,7 @@ public class  ReturnCodeUtil {
 	public static String returnCode3 = "9998";//数据格式不正确
 	public static String returnCode4 = "0002";//当前系统无该用户
 	public static String returnCode5 = "0003"; // 机构名称已经存在
+	public static String returnCode6 = "0004"; // 删除失败
 	static Log log = Log.getLog(ReturnCodeUtil.class);
 
 
