@@ -36,15 +36,37 @@ public class AuOrganizationDao implements IBaseDao {
 		return Db.use(configName).find(sql);
 	}
 
-	//判断机构名称是否存在
+	/**
+	 * 判断机构名称是否存在
+	 * @param orgName 机构名称
+	 * @param orgId 机构Id
+	 * @return
+	 */
 	public int findByName(String orgName,String orgId){
 		String sql = "";
 		if(EmptyUtils.isEmpty(orgId)){
-			sql = "SELECT count(*) as cnt FROM AU_ORGANIZATION WHERE ORG_NAME = ? AND ORG_ID != ? ";
-			return Db.use(configName).findFirst(sql,orgName,orgId).get("cnt");
-		}else {
 			sql = "SELECT count(*) as cnt FROM AU_ORGANIZATION WHERE ORG_NAME = ? ";
 			return Db.use(configName).findFirst(sql,orgName).get("cnt");
+		}else {
+			sql = "SELECT count(*) as cnt FROM AU_ORGANIZATION WHERE ORG_NAME = ? AND ORG_ID != ? ";
+			return Db.use(configName).findFirst(sql,orgName,orgId).get("cnt");
+		}
+	}
+
+	/**
+	 * 判断机构编码是否存在
+	 * @param orgCode 机构编码
+	 * @param orgId 机构Id
+	 * @return
+	 */
+	public int findByCode(String orgCode,String orgId){
+		String sql = "";
+		if(EmptyUtils.isEmpty(orgId)){
+			sql = "SELECT count(*) as cnt FROM AU_ORGANIZATION WHERE ORG_CODE = ? ";
+			return Db.use(configName).findFirst(sql,orgCode).get("cnt");
+		}else {
+			sql = "SELECT count(*) as cnt FROM AU_ORGANIZATION WHERE ORG_CODE = ? AND ORG_ID != ? ";
+			return Db.use(configName).findFirst(sql,orgCode,orgId).get("cnt");
 		}
 	}
 }

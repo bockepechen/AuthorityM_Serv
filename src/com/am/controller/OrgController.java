@@ -144,14 +144,19 @@ public class OrgController extends Controller {
 					if(orgNameCnt > 0){
 						returnCode = ReturnCodeUtil.returnCode5;
 					}else{
-						orgRecord.set("ORG_ID", DatabaseUtil.getEntityPrimaryKey("OG"));
-						orgRecord.set("ORG_CODE",orgCode);
-						orgRecord.set("ORG_NAME",orgName);
-						orgRecord.set("ORG_LEVEL",1); // 一级别
-						orgRecord.set("ORG_TYPE","02"); // 分公司
-						orgRecord.set("ORG_STATUS","01"); // 正常
-						AuOrganizationDao.dao.save(orgRecord);
-						returnCode = ReturnCodeUtil.returnCode;
+						int orgCodeCnt = AuOrganizationDao.dao.findByCode(orgCode,"");
+						if(orgCodeCnt > 0){
+							returnCode = ReturnCodeUtil.returnCode7;
+						}else {
+							orgRecord.set("ORG_ID", DatabaseUtil.getEntityPrimaryKey("OG"));
+							orgRecord.set("ORG_CODE", orgCode);
+							orgRecord.set("ORG_NAME", orgName);
+							orgRecord.set("ORG_LEVEL", 1); // 一级别
+							orgRecord.set("ORG_TYPE", "02"); // 分公司
+							orgRecord.set("ORG_STATUS", "01"); // 正常
+							AuOrganizationDao.dao.save(orgRecord);
+							returnCode = ReturnCodeUtil.returnCode;
+						}
 					}
 
 				}else {
@@ -159,12 +164,17 @@ public class OrgController extends Controller {
 					if(orgNameCnt > 0) {
 						returnCode = ReturnCodeUtil.returnCode5;
 					}else{
-						orgRecord.set("ORG_ID",orgId);
-						orgRecord.set("ORG_CODE",orgCode);
-						orgRecord.set("ORG_NAME",orgName);
-						orgRecord.set("UPDATE_TIME",DatabaseUtil.getSqlDatetime());
-						AuOrganizationDao.dao.update(orgRecord);
-						returnCode = ReturnCodeUtil.returnCode;
+						int orgCodeCnt = AuOrganizationDao.dao.findByCode(orgCode,orgId);
+						if(orgCodeCnt > 0){
+							returnCode = ReturnCodeUtil.returnCode7;
+						}else {
+							orgRecord.set("ORG_ID", orgId);
+							orgRecord.set("ORG_CODE", orgCode);
+							orgRecord.set("ORG_NAME", orgName);
+							orgRecord.set("UPDATE_TIME", DatabaseUtil.getSqlDatetime());
+							AuOrganizationDao.dao.update(orgRecord);
+							returnCode = ReturnCodeUtil.returnCode;
+						}
 					}
 				}
 			}
@@ -238,14 +248,15 @@ public class OrgController extends Controller {
 
 	}
 
-	/**
-	 * 添加机构人员
-	 */
-	public void addOrgUser(){
-		//获取请求数据
-		String json = HttpKit.readData(getRequest());
-
-	}
+	// /**
+	//  * 添加机构人员
+	//  */
+	// public void addOrgUser(){
+	// 	//获取请求数据
+	// 	String json = HttpKit.readData(getRequest());
+	//
+	//
+	// }
 
 	// 机构显示返回的json
 	public void returnJson() {
