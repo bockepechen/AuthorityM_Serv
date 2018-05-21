@@ -145,21 +145,11 @@ public class MenuController extends Controller{
 		//解析Json
 		Map map = new HashMap();
 		try{
-			map = JsonUtil.analyzejson(json);
-			reqNo = map.get("req_no").toString();
-			operatorId = map.get("operator_id").toString();
-			menuId = map.get("menu_id").toString();
-			if(EmptyUtils.isEmpty(reqNo) || EmptyUtils.isEmpty(operatorId) || EmptyUtils.isEmpty(menuId)){
-				returnCode = ReturnCodeUtil.returnCode3;
-			}else{
-				MenuService.service.deleteMenu(menuId);
-				returnCode = ReturnCodeUtil.returnCode;
-			}
-			returnDelJson();
+
 		}catch (Exception e){
 			log.error(e.getMessage(),e);
 			returnCode = ReturnCodeUtil.returnCode2;
-			returnDelJson();
+
 		}finally {
 			PubModelUtil.apiRecordBean(map,"AU016",json,jb.toString());
 		}
