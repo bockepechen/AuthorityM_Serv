@@ -45,13 +45,4 @@ public class AuEmployeeDao implements  IBaseDao{
 		return Db.use(configName).findFirst(sql,operatorId);
 	}
 
-	/**
-	 * 查询无机构的员工
-	 * @return
-	 */
-	public List<Record> findEmpNoOrg(){
-		String sql= "SELECT OP_OPRATORID AS operator_id,EMP_NAME AS name FROM AU_EMPLOYEE  WHERE ORG_ID IS NULL";
-		return Db.use(configName).find(sql);
-	}
-
 }

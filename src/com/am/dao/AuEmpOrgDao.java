@@ -17,7 +17,7 @@ public class AuEmpOrgDao implements IBaseDao {
 
 	@Override
 	public boolean save(Record record) {
-		return false;
+		return Db.use(configName).save(tableName,primaryKey,record);
 	}
 
 	@Override
@@ -42,6 +42,15 @@ public class AuEmpOrgDao implements IBaseDao {
 	 */
 	public  List<Record> findUserInOrg(String orgId){
 		String sql = "SELECT au.OP_OPRATORID AS operator_id,au.OP_NAME AS name FROM AU_OPERATOR au LEFT JOIN  AU_EMPORG ae ON au.OP_OPRATORID = ae.OP_OPRATORID WHERE ae.ORG_ID  = ?";
+		return Db.use(configName).find(sql,orgId);
+	}
+	/**
+	 * 查询不属于某机构的用户
+	 * @param orgId
+	 * @return
+	 */
+	public  List<Record> findUserNotOrg(String orgId){
+		String sql = "SELECT ao.OP_OPRATORID FROM  AU_OPERATOR ao WHERE NOT  EXISTS (SELECT ae.OP_OPRATORID FROM  AU_EMPORG ae WHERE ae.ORG_ID =? AND ae.OP_OPRATORID = ao.OP_OPRATORID)";
 		return Db.use(configName).find(sql,orgId);
 	}
 }

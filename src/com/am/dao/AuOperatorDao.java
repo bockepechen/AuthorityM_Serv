@@ -76,4 +76,13 @@ public class AuOperatorDao implements IBaseDao{
 		String sql  = "SELECT o.ORG_ID AS org_id,o.ORG_NAME AS org_name,r.RL_ID AS role_id,r.RL_NAME AS role_name FROM AU_ORGANIZATION o LEFT JOIN AU_EMPORG eo ON o.ORG_ID = eo.ORG_ID LEFT JOIN AU_ROLE r ON eo.RL_ID = r.RL_ID WHERE eo.OP_OPRATORID = ?";
 		return Db.use(configName).find(sql,operatorId);
 	}
+
+	/**
+	 * 查询无机构的员工
+	 * @return
+	 */
+	public List<Record> findEmpNoOrg(){
+		String sql= "SELECT ao.OP_OPRATORID   FROM AU_OPERATOR ao  WHERE  NOT EXISTS (SELECT ae.OP_OPRATORID FROM AU_EMPORG ae WHERE ae.OP_OPRATORID = ao.OP_OPRATORID)";
+		return Db.use(configName).find(sql);
+	}
 }
