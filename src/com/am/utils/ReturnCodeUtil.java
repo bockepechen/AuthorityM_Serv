@@ -13,7 +13,9 @@ public class  ReturnCodeUtil {
 	public static String returnCode4 = "0002";//当前系统无该用户
 	public static String returnCode5 = "0003"; // 机构名称已经存在
 	public static String returnCode6 = "0004"; // 删除失败
-	static Log log = Log.getLog(ReturnCodeUtil.class);
+	public static String returnCode7 = "0005"; // 机构编码已经存在
+	public static String returnCode8 = "0006"; // 角色名称已经存在
+	public static String returnCode9 = "0007"; // 角色编号已经存在
 
 
 
