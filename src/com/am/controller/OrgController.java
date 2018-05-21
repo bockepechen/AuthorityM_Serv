@@ -43,8 +43,8 @@ public class OrgController extends Controller {
 	 */
 	public void index(){
 		//获取请求数据
-		//String json = HttpKit.readData(getRequest());
-		String json = "{\n" +
+		String json = HttpKit.readData(getRequest());
+		/*String json = "{\n" +
 				"  \"jyau_content\": {\n" +
 				"    \"jyau_reqData\": [\n" +
 				"      {\n" +
@@ -58,7 +58,7 @@ public class OrgController extends Controller {
 				"      \"system_id\": \"10909\"\n" +
 				"    }\n" +
 				"  }\n" +
-				"}";
+				"}";*/
 		//解析Json
 		Map map = new HashMap();
 		try{
@@ -104,8 +104,8 @@ public class OrgController extends Controller {
 	 */
 	public void saveOrg(){
 		//获取请求数据
-		//String json = HttpKit.readData(getRequest());
-		String json = "{\n" +
+		String json = HttpKit.readData(getRequest());
+		/*String json = "{\n" +
 				"  \"jyau_content\": {\n" +
 				"    \"jyau_reqData\": [\n" +
 				"      {\n" +
@@ -122,7 +122,7 @@ public class OrgController extends Controller {
 				"      \"system_id\": \"10909\"\n" +
 				"    }\n" +
 				"  }\n" +
-				"}";
+				"}";*/
 		//解析Json
 		Map map = new HashMap();
 		try {
@@ -144,19 +144,14 @@ public class OrgController extends Controller {
 					if(orgNameCnt > 0){
 						returnCode = ReturnCodeUtil.returnCode5;
 					}else{
-						int orgCodeCnt = AuOrganizationDao.dao.findByCode(orgCode,"");
-						if(orgCodeCnt > 0){
-							returnCode = ReturnCodeUtil.returnCode7;
-						}else {
-							orgRecord.set("ORG_ID", DatabaseUtil.getEntityPrimaryKey("OG"));
-							orgRecord.set("ORG_CODE", orgCode);
-							orgRecord.set("ORG_NAME", orgName);
-							orgRecord.set("ORG_LEVEL", 1); // 一级别
-							orgRecord.set("ORG_TYPE", "02"); // 分公司
-							orgRecord.set("ORG_STATUS", "01"); // 正常
-							AuOrganizationDao.dao.save(orgRecord);
-							returnCode = ReturnCodeUtil.returnCode;
-						}
+						orgRecord.set("ORG_ID", DatabaseUtil.getEntityPrimaryKey("OG"));
+						orgRecord.set("ORG_CODE",orgCode);
+						orgRecord.set("ORG_NAME",orgName);
+						orgRecord.set("ORG_LEVEL",1); // 一级别
+						orgRecord.set("ORG_TYPE","02"); // 分公司
+						orgRecord.set("ORG_STATUS","01"); // 正常
+						AuOrganizationDao.dao.save(orgRecord);
+						returnCode = ReturnCodeUtil.returnCode;
 					}
 
 				}else {
@@ -164,17 +159,12 @@ public class OrgController extends Controller {
 					if(orgNameCnt > 0) {
 						returnCode = ReturnCodeUtil.returnCode5;
 					}else{
-						int orgCodeCnt = AuOrganizationDao.dao.findByCode(orgCode,orgId);
-						if(orgCodeCnt > 0){
-							returnCode = ReturnCodeUtil.returnCode7;
-						}else {
-							orgRecord.set("ORG_ID", orgId);
-							orgRecord.set("ORG_CODE", orgCode);
-							orgRecord.set("ORG_NAME", orgName);
-							orgRecord.set("UPDATE_TIME", DatabaseUtil.getSqlDatetime());
-							AuOrganizationDao.dao.update(orgRecord);
-							returnCode = ReturnCodeUtil.returnCode;
-						}
+						orgRecord.set("ORG_ID",orgId);
+						orgRecord.set("ORG_CODE",orgCode);
+						orgRecord.set("ORG_NAME",orgName);
+						orgRecord.set("UPDATE_TIME",DatabaseUtil.getSqlDatetime());
+						AuOrganizationDao.dao.update(orgRecord);
+						returnCode = ReturnCodeUtil.returnCode;
 					}
 				}
 			}
