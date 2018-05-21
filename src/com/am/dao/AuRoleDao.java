@@ -40,8 +40,8 @@ public class AuRoleDao implements IBaseDao{
 	 * @param orgId
 	 * @return
 	 */
-	public Record queryRole(String operatorId, String orgId){
+	/*public Record queryRole(String operatorId, String orgId){
 		String sql = "SELECT r.RL_ID,r.RL_NAME FROM AU_ROLE r LEFT JOIN  AU_EMPORG eo ON eo.RL_ID = r.RL_ID WHERE eo.OP_OPRATORID = ?  AND eo.ORG_ID = ?";
 		return Db.use(configName).findFirst(sql,operatorId,orgId);
-	}
+	}*/
 }
