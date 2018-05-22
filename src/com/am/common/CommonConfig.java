@@ -87,6 +87,7 @@ public class CommonConfig extends JFinalConfig {
 		me.add("/emporg", OrgEmpManageController.class);
 		me.add("/org",OrgController.class);
 		me.add("/role",RoleController.class);
+		me.add("/menu",MenuController.class);
 
 	}
 

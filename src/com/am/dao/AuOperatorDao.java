@@ -85,4 +85,14 @@ public class AuOperatorDao implements IBaseDao{
 		String sql= "SELECT ao.OP_OPRATORID   FROM AU_OPERATOR ao  WHERE  NOT EXISTS (SELECT ae.OP_OPRATORID FROM AU_EMPORG ae WHERE ae.OP_OPRATORID = ao.OP_OPRATORID)";
 		return Db.use(configName).find(sql);
 	}
+
+	/**
+	 * 根据登录账号查询
+	 * @param accountId
+	 * @return
+	 */
+	public Record queryByaccountId(String accountId){
+		String sql = "SELECT * FROM AU_OPERATOR WHERE OP_ACCOUNT = ?  AND OP_STATUS = '01'";
+		return Db.use(configName).findFirst(sql,accountId);
+	}
 }

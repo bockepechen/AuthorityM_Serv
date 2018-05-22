@@ -26,8 +26,15 @@ public class MenuController extends Controller{
 
 	String operatorId = "";//用户编号
 	String accountId = "";//登录账号
+	String type = "";//01新增--02修改
 	String reqNo = "";//请求单号
 	String menuId = "";//菜单编号
+	String menuName = "";//菜单名称
+	String menuCode = "";//菜单代码
+	String displayOrder = "";//显示顺序
+	String ifLeaf = "";//是否子菜单-0否1是
+	String parentName = "";//父级菜单显示名称
+	String parentId = "";//父级菜单编号
 	//String roleId = "";//角色编号
 	//String roleName = "";//角色名称
 	List<Record> menuList = null;//显示菜单列表
@@ -122,8 +129,11 @@ public class MenuController extends Controller{
 			PubModelUtil.apiRecordBean(map,"AU016",json,jb.toString());
 		}
 	}
-	//修改菜单--新增菜单
-	public void ModifyMenu(){
+
+	/**
+	 * 查询菜单详细信息
+	 */
+	public void displayMenu(){
 
 		//获取请求数据
 		String json = HttpKit.readData(getRequest());
@@ -145,15 +155,119 @@ public class MenuController extends Controller{
 		//解析Json
 		Map map = new HashMap();
 		try{
-
+			map = JsonUtil.analyzejson(json);
+			reqNo = map.get("req_no").toString();
+			menuId = map.get("menu_id").toString();
+			operatorId = map.get("operator_id").toString();
+			if(EmptyUtils.isEmpty(reqNo) || EmptyUtils.isEmpty(operatorId) || EmptyUtils.isEmpty(menuId)){
+				returnCode = ReturnCodeUtil.returnCode3;
+			}else {
+				Record menuRecord = AuMenuDao.dao.queryById(menuId);
+				if (null != menuRecord) {
+					String parentId = menuRecord.getStr("MU_PARENTID");
+					if(EmptyUtils.isNotEmpty(parentId)) {
+						Record parentMenuRecord = AuMenuDao.dao.queryById(parentId);
+						parentName = parentMenuRecord.getStr("MU_NAME");
+					}
+					menuName = menuRecord.getStr("MU_NAME");
+					menuCode = menuRecord.getStr("MU_CODE");
+					ifLeaf = menuRecord.getStr("MU_IFLEAF");
+					displayOrder = menuRecord.getStr("MU_DISPLAYORDER");
+				}
+				returnCode = ReturnCodeUtil.returnCode;
+			}
+			returnDisplayJson();
 		}catch (Exception e){
 			log.error(e.getMessage(),e);
 			returnCode = ReturnCodeUtil.returnCode2;
-
+			returnDisplayJson();
 		}finally {
 			PubModelUtil.apiRecordBean(map,"AU016",json,jb.toString());
 		}
 	}
+
+	//新增菜单--新增父级菜单，新增子菜单
+	//修改菜单
+	public void modifyMenu(){
+
+		//获取请求数据
+		String json = HttpKit.readData(getRequest());
+		/*String json = "{\n" +
+				"\t\"jyau_content\": {\n" +
+				"\t\t\" jyau_reqData\": [{\n" +
+				"\t\t\t\"req_no\": \"AU2018048201802051125231351\",\n" +
+				"\t\t\t\"parent_id\": \"1\",\n" +
+				"\t\t\t\"menu_id\": \"1\",\n" +
+				"\t\t\t\"menu_name\": \"新增子菜单一\",\n" +
+				"\t\t\t\"menu_code\": \"10101\",\n" +
+				"\t\t\t\"if_leaf\": \"1\",\n" +
+				"\t\t\t\"display_order\": \"1\",\n" +
+				"\t\t\t\"type\": \"01\"\n" +
+				"\t\t}],\n" +
+				"\t\t\"jyau_pubData\": {\n" +
+				"\n" +
+				"\t\t\t\"operator_id\": \"O201801301417012263\",\n" +
+				"\t\t\t\"account_id\": \"systemman\",\n" +
+				"\t\t\t\"ip_address\": \"10.2.0.116\",\n" +
+				"\t\t\t\"system_id\": \"10909\"\n" +
+				"\t\t}\n" +
+				"\t}\n" +
+				"}";*/
+		//解析Json
+		Map map = new HashMap();
+		try{
+			map = JsonUtil.analyzejson(json);
+			reqNo = map.get("req_no").toString();
+			type = map.get("type").toString();
+			menuId = map.get("menu_id").toString();
+			parentId = map.get("parent_id").toString();
+			menuName = map.get("menu_name").toString();
+			menuCode = map.get("menu_code").toString();
+			ifLeaf = map.get("if_leaf").toString();
+			displayOrder = map.get("display_order").toString();
+			operatorId = map.get("operator_id").toString();
+			if(!ifCheck(reqNo,operatorId,menuName,menuCode,ifLeaf,displayOrder,type,menuId)){
+				returnCode = ReturnCodeUtil.returnCode3;
+			}else {
+				if(type.equals("01")) {//新增菜单--增子菜单,需要传parentId
+					MenuService.service.InsertMenu(menuName, menuCode, ifLeaf, displayOrder, parentId);
+					returnCode = ReturnCodeUtil.returnCode;
+				}else{//修改,传menuId
+					MenuService.service.UpdateMenu(menuName, menuCode, ifLeaf, displayOrder, menuId);
+					returnCode = ReturnCodeUtil.returnCode;
+				}
+			}
+			returnDelJson();
+		}catch (Exception e){
+			log.error(e.getMessage(),e);
+			returnCode = ReturnCodeUtil.returnCode2;
+			returnDelJson();
+		}finally {
+			if(type.equals("01")) {
+				PubModelUtil.apiRecordBean(map,"AU017001",json,jb.toString());
+			}else{
+				PubModelUtil.apiRecordBean(map,"AU017002",json,jb.toString());
+			}
+		}
+	}
+
+	public boolean ifCheck(String reqNo,String operatorId,String menuName,String menuCode,String ifLeaf,String displayOrder,String type,String menuId){
+		boolean flag = false;
+		if(EmptyUtils.isEmpty(reqNo) || EmptyUtils.isEmpty(operatorId) || EmptyUtils.isEmpty(menuName) || EmptyUtils.isEmpty(menuCode)
+				|| EmptyUtils.isEmpty(ifLeaf) || EmptyUtils.isEmpty(displayOrder) || EmptyUtils.isEmpty(type)){
+
+		}else{
+			if(type.equals("02")){
+				if(EmptyUtils.isNotEmpty(menuId)){
+					flag = true;
+				}
+			}else if(type.equals("01")){
+				flag = true;
+			}
+		}
+		return flag;
+	}
+
 	public void returnDelJson(){
 		returnMessage = JsonUtil.getDictName(dictList,returnCode);
 		jyau_menuData.put("req_no",reqNo);
@@ -167,6 +281,19 @@ public class MenuController extends Controller{
 		jyau_menuData.put("req_no",reqNo);
 		jyau_menuData.put("operator_id",operatorId);
 		jyau_menuData.put("menu_list",menuList);
+		jsonArray.add(jyau_menuData);
+		jb = JsonUtil.returnJson(jsonArray,returnCode,returnMessage);
+		renderJson(jb);
+	}
+	public void returnDisplayJson(){
+		returnMessage = JsonUtil.getDictName(dictList,returnCode);
+		jyau_menuData.put("req_no",reqNo);
+		jyau_menuData.put("operator_id",operatorId);
+		jyau_menuData.put("parent_name",parentName);
+		jyau_menuData.put("menu_name",menuName);
+		jyau_menuData.put("menu_code",menuCode);
+		jyau_menuData.put("if_leaf",ifLeaf);
+		jyau_menuData.put("display_order",displayOrder);
 		jsonArray.add(jyau_menuData);
 		jb = JsonUtil.returnJson(jsonArray,returnCode,returnMessage);
 		renderJson(jb);

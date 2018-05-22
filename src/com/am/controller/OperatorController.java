@@ -13,6 +13,7 @@ import com.jfinal.kit.HttpKit;
 import com.jfinal.log.Log;
 import com.jfinal.plugin.activerecord.Record;
 import com.jfinal.plugin.ehcache.CacheKit;
+import com.jfinal.weixin.sdk.api.ReturnCode;
 
 import java.util.HashMap;
 import java.util.List;
@@ -180,8 +181,14 @@ public class OperatorController extends Controller {
 				returnCode = ReturnCodeUtil.returnCode3;
 			}else {
 				if(type.equals("01")){//新增
-					operatorId = OperatorService.service.operatorInterestBiz(account,name,pwd,status,ifAdimn);
-					returnCode = ReturnCodeUtil.returnCode;
+					//查询登录账号是否存在
+					Record operRecord = AuOperatorDao.dao.queryByaccountId(account);
+					if(null != operRecord){
+						returnCode = ReturnCodeUtil.returnCode11;
+					}else{
+						operatorId = OperatorService.service.operatorInterestBiz(account,name,pwd,status,ifAdimn);
+						returnCode = ReturnCodeUtil.returnCode;
+					}
 				}else{//修改
 					OperatorService.service.operatorModifyBiz(operatorId,account,name,pwd,status,ifAdimn);
 					returnCode = ReturnCodeUtil.returnCode;
