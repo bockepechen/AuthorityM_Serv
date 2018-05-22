@@ -47,6 +47,16 @@ public class AuRoleDao implements IBaseDao{
 	}
 
 	/**
+	 * 根据Id 查询角色详细信息
+	 * @param roleId 角色ID
+	 * @return
+	 */
+	public Record findById(String roleId){
+		String sql = "SELECT * FROM AU_ROLE WHERE RL_ID = ? ";
+		return Db.use(configName).findFirst(sql,roleId);
+	}
+
+	/**
 	 * 判断角色名称是否存在
 	 * @param roleName 角色名称
 	 * @param roleId 角色Id
@@ -72,7 +82,7 @@ public class AuRoleDao implements IBaseDao{
 	public int findByCode(String roleCode,String roleId){
 		String sql = "";
 		if(EmptyUtils.isEmpty(roleId)){
-			sql = "SELECT count(*) as cnt FROM AU_ROLE WHERE OR RL_CODE = ? ";
+			sql = "SELECT count(*) as cnt FROM AU_ROLE WHERE RL_CODE = ? ";
 			return Db.use(configName).findFirst(sql,roleCode).get("cnt");
 		}else {
 			sql = "SELECT count(*) as cnt FROM AU_ROLE WHERE RL_CODE = ? AND RL_ID != ? ";

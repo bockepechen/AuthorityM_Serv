@@ -181,6 +181,59 @@ public class RoleController extends Controller{
 
 	}
 
+	// 显示角色详细信息
+	public void showRole(){
+		//获取请求数据
+		String json = HttpKit.readData(getRequest());
+		/*String json = "{\n" +
+				"  \"jyau_content\": {\n" +
+				"    \"jyau_reqData\": [\n" +
+				"      {\n" +
+				"        \"req_no\": \"CL048201802051125231351\",\n" +
+				"        \"role_id\": \"1\"\n" +
+				"      }\n" +
+				"    ],\n" +
+				"    \"jyau_pubData\": {\n" +
+				"      \"operator_id\": \"1\",\n" +
+				"      \"ip_address\": \"10.2.0.116\",\n" +
+				"      \"account_id\": \"systemman\",\n" +
+				"      \"system_id\": \"10909\"\n" +
+				"    }\n" +
+				"  }\n" +
+				"}";*/
+		//解析Json
+		Map map = new HashMap();
+		jyau_roleData = new JSONObject();
+		try {
+			map = JsonUtil.analyzejson(json);
+			reqNo = map.get("req_no").toString();
+			accountId = map.get("account_id").toString();
+			operatorId = map.get("operator_id").toString();
+			roleId = map.get("role_id").toString();
+
+			if(EmptyUtils.isEmpty(reqNo) || EmptyUtils.isEmpty(accountId) || EmptyUtils.isEmpty(operatorId) || EmptyUtils.isEmpty(roleId)){
+				returnCode = ReturnCodeUtil.returnCode3;
+			}else {
+				Record roleRecord = AuRoleDao.dao.findById(roleId);
+				if(null == roleRecord){
+					returnCode = ReturnCodeUtil.returnCode10;
+				}else{
+					jyau_roleData.put("role_id",roleRecord.getStr("RL_ID"));
+					jyau_roleData.put("role_code",roleRecord.getStr("RL_CODE"));
+					jyau_roleData.put("role_name",roleRecord.getStr("RL_NAME"));
+					returnCode = ReturnCodeUtil.returnCode;
+				}
+			}
+			returnDetailJson(jyau_roleData);
+		}catch (Exception e){
+			log.error(e.getMessage(), e);
+			returnCode = ReturnCodeUtil.returnCode2;
+			returnDetailJson(jyau_roleData);
+		}finally {
+			PubModelUtil.apiRecordBean(map,"AU014",json,jb.toString());
+		}
+	}
+
 	// 删除角色信息
 	public void delRole(){
 		//获取请求数据
@@ -248,6 +301,16 @@ public class RoleController extends Controller{
 	public void returnOperJson(){
 		returnMessage = JsonUtil.getDictName(dictList,returnCode);
 		jyau_roleData = new JSONObject();
+		//拼装json
+		jyau_roleData.put("req_no", reqNo);
+		jsonArray.add(jyau_roleData);
+		jb = JsonUtil.returnJson(jsonArray,returnCode,returnMessage);
+		renderJson(jb);
+	}
+
+	// 角色详细信息返回json
+	public void returnDetailJson(JSONObject jyau_roleData){
+		returnMessage = JsonUtil.getDictName(dictList,returnCode);
 		//拼装json
 		jyau_roleData.put("req_no", reqNo);
 		jsonArray.add(jyau_roleData);
