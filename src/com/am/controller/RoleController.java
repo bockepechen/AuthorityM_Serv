@@ -191,7 +191,7 @@ public class RoleController extends Controller{
 				"      {\n" +
 				"        \"req_no\": \"CL048201802051125231351\",\n" +
 				"        \"role_id\": \"1\"\n" +
-				"      }\n" +
+				"       }\n" +
 				"    ],\n" +
 				"    \"jyau_pubData\": {\n" +
 				"      \"operator_id\": \"1\",\n" +
