@@ -7,7 +7,7 @@ import com.jfinal.log.Log;
  */
 public class  ReturnCodeUtil {
 	public static String returnCode = "0000";//成功
-	public static String returnCode1 = "0001";//登录失败
+	public static String returnCode1 = "0001";//登录失败--用户名或密码错误
 	public static String returnCode2 = "9999";//请求异常
 	public static String returnCode3 = "9998";//数据格式不正确
 	public static String returnCode4 = "0002";//当前系统无该用户
@@ -17,6 +17,7 @@ public class  ReturnCodeUtil {
 	public static String returnCode8 = "0006"; // 角色名称已经存在
 	public static String returnCode9 = "0007"; // 角色编号已经存在
 	public static String returnCode10 = "0008"; // 信息不存在
+	public static String returnCode11 = "0008"; // 当前登录账号已存在
 
 
 
