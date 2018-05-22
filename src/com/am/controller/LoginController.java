@@ -43,7 +43,6 @@ public class LoginController extends Controller {
 		String json = HttpKit.readData(getRequest());
 
 		/*String json = "{\n" +
-				"\n" +
 				"\t\"jyau_content\": {\n" +
 				"\t\t\"jyau_reqData\": [{\n" +
 				"\t\t\t\"req_no\": \" AU001201810231521335687\",\n" +
@@ -70,15 +69,17 @@ public class LoginController extends Controller {
 			}else {
 				//调用登录业务逻辑
 				Map loginMap = LoginService.service.loginBiz(accountId,pwd,ip);
-				operatorId = loginMap.get("operatorId").toString();
-				if(null != loginMap.get("lastIp")){
-					lastIp = loginMap.get("lastIp").toString();
-				}
-				if(null != loginMap.get("lastLogin")){
-					lastLogin = loginMap.get("lastLogin").toString();
-				}
-				orgList = (List<Record>) loginMap.get("orgList");
 				returnCode = loginMap.get("returnCode").toString();
+				if(returnCode.equals("0000")) {
+					operatorId = loginMap.get("operatorId").toString();
+					if (null != loginMap.get("lastIp")) {
+						lastIp = loginMap.get("lastIp").toString();
+					}
+					if (null != loginMap.get("lastLogin")) {
+						lastLogin = loginMap.get("lastLogin").toString();
+					}
+					orgList = (List<Record>) loginMap.get("orgList");
+				}
 			}
 			returnJson();
 		} catch (Exception e) {
