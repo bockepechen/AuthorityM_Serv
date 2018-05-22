@@ -59,7 +59,7 @@ public class AuEmpOrgDao implements IBaseDao {
 	 * @param roleId 角色Id
 	 * @return
 	 */
-	public List<Record> findUserByRoleId(String roleId){
+	public List<Record> findUsersHaveRole(String roleId){
 		String sql = "SELECT r.LA_ID,r.OP_OPRATORID,r.RL_ID,r.ORG_ID,p.OP_ACCOUNT,p.OP_NAME,o.ORG_NAME,o.ORG_CODE FROM AU_EMPORG r,AU_OPERATOR p,AU_ORGANIZATION o WHERE r.OP_OPRATORID = p.OP_OPRATORID AND r.ORG_ID = o.ORG_ID AND p.OP_STATUS = '01' AND p.OP_IFOPERATOR = '1' AND r.RL_ID = ? ";
 		return Db.use(configName).find(sql,roleId);
 	}
