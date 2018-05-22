@@ -19,7 +19,4 @@ public class  ReturnCodeUtil {
 	public static String returnCode10 = "0008"; // 信息不存在
 	public static String returnCode11 = "0009"; // 当前登录账号已存在
 
-
-
-
 }
