@@ -84,7 +84,7 @@ public class MenuController extends Controller{
 			returnCode = ReturnCodeUtil.returnCode2;
 			returnJson();
 		}finally {
-			PubModelUtil.apiRecordBean(map,"AU016",json,jb.toString());
+			PubModelUtil.apiRecordBean(map,"AU017",json,jb.toString());
 		}
 	}
 	//删除菜单
@@ -172,7 +172,9 @@ public class MenuController extends Controller{
 					menuName = menuRecord.getStr("MU_NAME");
 					menuCode = menuRecord.getStr("MU_CODE");
 					ifLeaf = menuRecord.getStr("MU_IFLEAF");
-					displayOrder = menuRecord.getStr("MU_DISPLAYORDER");
+					if(null != menuRecord.getInt("MU_DISPLAYORDER")){
+						displayOrder = menuRecord.getInt("MU_DISPLAYORDER").toString();
+					}
 				}
 				returnCode = ReturnCodeUtil.returnCode;
 			}
@@ -182,7 +184,7 @@ public class MenuController extends Controller{
 			returnCode = ReturnCodeUtil.returnCode2;
 			returnDisplayJson();
 		}finally {
-			PubModelUtil.apiRecordBean(map,"AU016",json,jb.toString());
+			PubModelUtil.apiRecordBean(map,"AU019",json,jb.toString());
 		}
 	}
 
@@ -244,9 +246,9 @@ public class MenuController extends Controller{
 			returnDelJson();
 		}finally {
 			if(type.equals("01")) {
-				PubModelUtil.apiRecordBean(map,"AU017001",json,jb.toString());
+				PubModelUtil.apiRecordBean(map,"AU02001",json,jb.toString());
 			}else{
-				PubModelUtil.apiRecordBean(map,"AU017002",json,jb.toString());
+				PubModelUtil.apiRecordBean(map,"AU02002",json,jb.toString());
 			}
 		}
 	}

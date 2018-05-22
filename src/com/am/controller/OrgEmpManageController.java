@@ -142,7 +142,7 @@ public class OrgEmpManageController extends Controller{
 			returnCode = ReturnCodeUtil.returnCode2;
 			returnNotOrgJson();
 		} finally {
-			PubModelUtil.apiRecordBean(map,"AU011",json,jb.toString());
+			PubModelUtil.apiRecordBean(map,"AU015",json,jb.toString());
 		}
 	}
 
@@ -188,7 +188,7 @@ public class OrgEmpManageController extends Controller{
 			returnCode = ReturnCodeUtil.returnCode2;
 			returnOrgJson();
 		} finally {
-			PubModelUtil.apiRecordBean(map,"AU011",json,jb.toString());
+			PubModelUtil.apiRecordBean(map,"AU016",json,jb.toString());
 		}
 	}
 

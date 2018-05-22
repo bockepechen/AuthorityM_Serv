@@ -50,7 +50,7 @@ public class AuEmpOrgDao implements IBaseDao {
 	 * @return
 	 */
 	public  List<Record> findUserNotOrg(String orgId){
-		String sql = "SELECT ao.OP_OPRATORID FROM  AU_OPERATOR ao WHERE NOT  EXISTS (SELECT ae.OP_OPRATORID FROM  AU_EMPORG ae WHERE ae.ORG_ID =? AND ae.OP_OPRATORID = ao.OP_OPRATORID)";
+		String sql = "SELECT ao.OP_OPRATORID AS operator_id,ao.OP_NAME AS name FROM  AU_OPERATOR ao WHERE NOT  EXISTS (SELECT ae.OP_OPRATORID FROM  AU_EMPORG ae WHERE ae.ORG_ID =? AND ae.OP_OPRATORID = ao.OP_OPRATORID)";
 		return Db.use(configName).find(sql,orgId);
 	}
 }
