@@ -17,9 +17,6 @@ public class  ReturnCodeUtil {
 	public static String returnCode8 = "0006"; // 角色名称已经存在
 	public static String returnCode9 = "0007"; // 角色编号已经存在
 	public static String returnCode10 = "0008"; // 信息不存在
-	public static String returnCode11 = "0011"; // 当前登录账号已存在
-
-
-
+	public static String returnCode11 = "0009"; // 当前登录账号已存在
 
 }
