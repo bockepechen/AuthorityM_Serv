@@ -144,14 +144,19 @@ public class OrgController extends Controller {
 					if(orgNameCnt > 0){
 						returnCode = ReturnCodeUtil.returnCode5;
 					}else{
-						orgRecord.set("ORG_ID", DatabaseUtil.getEntityPrimaryKey("OG"));
-						orgRecord.set("ORG_CODE",orgCode);
-						orgRecord.set("ORG_NAME",orgName);
-						orgRecord.set("ORG_LEVEL",1); // 一级别
-						orgRecord.set("ORG_TYPE","02"); // 分公司
-						orgRecord.set("ORG_STATUS","01"); // 正常
-						AuOrganizationDao.dao.save(orgRecord);
-						returnCode = ReturnCodeUtil.returnCode;
+						int orgCodeCnt = AuOrganizationDao.dao.findByCode(orgCode,"");
+						if(orgCodeCnt > 0){
+							returnCode = ReturnCodeUtil.returnCode7;
+						}else {
+							orgRecord.set("ORG_ID", DatabaseUtil.getEntityPrimaryKey("OG"));
+							orgRecord.set("ORG_CODE", orgCode);
+							orgRecord.set("ORG_NAME", orgName);
+							orgRecord.set("ORG_LEVEL", 1); // 一级别
+							orgRecord.set("ORG_TYPE", "02"); // 分公司
+							orgRecord.set("ORG_STATUS", "01"); // 正常
+							AuOrganizationDao.dao.save(orgRecord);
+							returnCode = ReturnCodeUtil.returnCode;
+						}
 					}
 
 				}else {
@@ -159,12 +164,17 @@ public class OrgController extends Controller {
 					if(orgNameCnt > 0) {
 						returnCode = ReturnCodeUtil.returnCode5;
 					}else{
-						orgRecord.set("ORG_ID",orgId);
-						orgRecord.set("ORG_CODE",orgCode);
-						orgRecord.set("ORG_NAME",orgName);
-						orgRecord.set("UPDATE_TIME",DatabaseUtil.getSqlDatetime());
-						AuOrganizationDao.dao.update(orgRecord);
-						returnCode = ReturnCodeUtil.returnCode;
+						int orgCodeCnt = AuOrganizationDao.dao.findByCode(orgCode,orgId);
+						if(orgCodeCnt > 0){
+							returnCode = ReturnCodeUtil.returnCode7;
+						}else {
+							orgRecord.set("ORG_ID", orgId);
+							orgRecord.set("ORG_CODE", orgCode);
+							orgRecord.set("ORG_NAME", orgName);
+							orgRecord.set("UPDATE_TIME", DatabaseUtil.getSqlDatetime());
+							AuOrganizationDao.dao.update(orgRecord);
+							returnCode = ReturnCodeUtil.returnCode;
+						}
 					}
 				}
 			}
@@ -180,6 +190,60 @@ public class OrgController extends Controller {
 				PubModelUtil.apiRecordBean(map,"AU00302",json,jb.toString());
 			}
 
+		}
+
+	}
+
+	//显示机构详细信息
+	public void showOrg(){
+		//获取请求数据
+		String json = HttpKit.readData(getRequest());
+		/*String json = "{\n" +
+				"  \"jyau_content\": {\n" +
+				"    \"jyau_reqData\": [\n" +
+				"      {\n" +
+				"        \"req_no\": \"CL048201802051125231351\",\n" +
+				"        \"org_id\": \"1\"\n" +
+				"      }\n" +
+				"    ],\n" +
+				"    \"jyau_pubData\": {\n" +
+				"      \"operator_id\": \"1\",\n" +
+				"      \"ip_address\": \"10.2.0.116\",\n" +
+				"      \"account_id\": \"systemman\",\n" +
+				"      \"system_id\": \"10909\"\n" +
+				"    }\n" +
+				"  }\n" +
+				"}";*/
+		//解析Json
+		Map map = new HashMap();
+		jyau_orgData = new JSONObject();
+		try {
+			map = JsonUtil.analyzejson(json);
+			reqNo = map.get("req_no").toString();
+			accountId = map.get("account_id").toString();
+			operatorId = map.get("operator_id").toString();
+			orgId = map.get("org_id").toString();
+
+			if(EmptyUtils.isEmpty(reqNo) || EmptyUtils.isEmpty(accountId) || EmptyUtils.isEmpty(operatorId) || EmptyUtils.isEmpty(orgId)){
+				returnCode = ReturnCodeUtil.returnCode3;
+			}else {
+				Record orgRecord = AuOrganizationDao.dao.findById(orgId);
+				if(null == orgRecord){
+					returnCode = ReturnCodeUtil.returnCode10;
+				}else{
+					jyau_orgData.put("org_id",orgRecord.getStr("org_id"));
+					jyau_orgData.put("org_code",orgRecord.getStr("org_code"));
+					jyau_orgData.put("org_name",orgRecord.getStr("org_name"));
+					returnCode = ReturnCodeUtil.returnCode;
+				}
+			}
+			returnDetailJson(jyau_orgData);
+		}catch (Exception e){
+			log.error(e.getMessage(), e);
+			returnCode = ReturnCodeUtil.returnCode2;
+			returnDetailJson(jyau_orgData);
+		}finally {
+			PubModelUtil.apiRecordBean(map,"AU005",json,jb.toString());
 		}
 
 	}
@@ -264,6 +328,16 @@ public class OrgController extends Controller {
 	public void returnOperJson(){
 		returnMessage = JsonUtil.getDictName(dictList,returnCode);
 		jyau_orgData = new JSONObject();
+		//拼装json
+		jyau_orgData.put("req_no", reqNo);
+		jsonArray.add(jyau_orgData);
+		jb = JsonUtil.returnJson(jsonArray,returnCode,returnMessage);
+		renderJson(jb);
+	}
+
+	// 机构详细信息
+	public void returnDetailJson(JSONObject jyau_orgData){
+		returnMessage = JsonUtil.getDictName(dictList,returnCode);
 		//拼装json
 		jyau_orgData.put("req_no", reqNo);
 		jsonArray.add(jyau_orgData);

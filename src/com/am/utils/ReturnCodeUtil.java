@@ -16,6 +16,7 @@ public class  ReturnCodeUtil {
 	public static String returnCode7 = "0005"; // 机构编码已经存在
 	public static String returnCode8 = "0006"; // 角色名称已经存在
 	public static String returnCode9 = "0007"; // 角色编号已经存在
+	public static String returnCode10 = "0010"; // 信息不存在
 
 
 

@@ -37,6 +37,16 @@ public class AuOrganizationDao implements IBaseDao {
 	}
 
 	/**
+	 * 根据机构Id 查询机构详情
+	 * @param orgId
+	 * @return
+	 */
+	public Record findById(String orgId){
+		String sql = "SELECT o.ORG_ID AS org_id,o.ORG_CODE AS org_code,o.ORG_NAME AS org_name FROM AU_ORGANIZATION o WHERE o.ORG_ID = ? ";
+		return Db.use(configName).findFirst(sql,orgId);
+	}
+
+	/**
 	 * 判断机构名称是否存在
 	 * @param orgName 机构名称
 	 * @param orgId 机构Id
