@@ -164,7 +164,7 @@ public class MenuController extends Controller{
 			}else {
 				Record menuRecord = AuMenuDao.dao.queryById(menuId);
 				if (null != menuRecord) {
-					String parentId = menuRecord.getStr("MU_PARENTID");
+					parentId = menuRecord.getStr("MU_PARENTID");
 					if(EmptyUtils.isNotEmpty(parentId)) {
 						Record parentMenuRecord = AuMenuDao.dao.queryById(parentId);
 						parentName = parentMenuRecord.getStr("MU_NAME");
@@ -291,6 +291,7 @@ public class MenuController extends Controller{
 		returnMessage = JsonUtil.getDictName(dictList,returnCode);
 		jyau_menuData.put("req_no",reqNo);
 		jyau_menuData.put("operator_id",operatorId);
+		jyau_menuData.put("parent_id",parentId);
 		jyau_menuData.put("parent_name",parentName);
 		jyau_menuData.put("menu_name",menuName);
 		jyau_menuData.put("menu_code",menuCode);
