@@ -68,12 +68,12 @@ public class AuOperatorDao implements IBaseDao{
 	}
 
 	/**
-	 * 查询用户所属哪些机构及角色
+	 * 查询用户所属哪些机构
 	 * @param operatorId
 	 * @return
 	 */
 	public List<Record> queryOrgByOperatorId(String operatorId){
-		String sql  = "SELECT o.ORG_ID AS org_id,o.ORG_NAME AS org_name,r.RL_ID AS role_id,r.RL_NAME AS role_name FROM AU_ORGANIZATION o LEFT JOIN AU_EMPORG eo ON o.ORG_ID = eo.ORG_ID LEFT JOIN AU_ROLE r ON eo.RL_ID = r.RL_ID WHERE eo.OP_OPRATORID = ?";
+		String sql  = "SELECT DISTINCT  o.ORG_ID AS org_id, o.ORG_NAME AS org_name FROM  AU_ORGANIZATION o LEFT JOIN AU_EMPORG eo ON o.ORG_ID = eo.ORG_ID WHERE eo.OP_OPRATORID = ? AND eo.RL_ID IS NOT NULL";
 		return Db.use(configName).find(sql,operatorId);
 	}
 
