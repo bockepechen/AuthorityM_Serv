@@ -6,16 +6,16 @@ import com.am.dao.AuEmpOrgDao;
 import com.am.dao.AuOperatorDao;
 import com.am.dao.AuOrganizationDao;
 import com.am.service.OrgEmpRoleService;
-import com.am.utils.EmptyUtils;
-import com.am.utils.JsonUtil;
-import com.am.utils.PubModelUtil;
-import com.am.utils.ReturnCodeUtil;
+import com.am.utils.*;
 import com.jfinal.core.Controller;
 import com.jfinal.kit.HttpKit;
 import com.jfinal.log.Log;
+import com.jfinal.plugin.activerecord.Db;
+import com.jfinal.plugin.activerecord.IAtom;
 import com.jfinal.plugin.activerecord.Record;
 import com.jfinal.plugin.ehcache.CacheKit;
 
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,6 +37,7 @@ public class OrgEmpManageController extends Controller{
 	String roleId = ""; // 角色Id
 	List<Record> userList = null;// 拥有角色的用户列表信息
 	List<Record> userNList = null;// 不含有该角色的用户信息
+	List<Record> orgList = null; //机构信息
 	JSONArray userRoleArray = new JSONArray(); // 返回拥有角色的用户listJson
 	String operdata = ""; // 操作数据（用于删除或添加用户信息）
 
@@ -202,18 +203,46 @@ public class OrgEmpManageController extends Controller{
 	public void showRoleUser(){
 		//获取请求数据
 		String json = HttpKit.readData(getRequest());
+		/*String json = "{\n" +
+				"  \"jyau_content\": {\n" +
+				"    \"jyau_reqData\": [\n" +
+				"      {\n" +
+				"        \"req_no\": \"AU002201810231521335687\",\n" +
+				"        \"role_id\": \"1\"\n" +
+				"      }\n" +
+				"    ],\n" +
+				"    \"jyau_pubData\": {\n" +
+				"      \"operator_id\": \"1\",\n" +
+				"      \"ip_address\": \"10.2.0.116\",\n" +
+				"      \"account_id\": \"systemman\",\n" +
+				"      \"system_id\": \"10909\"\n" +
+				"    }\n" +
+				"  }\n" +
+				"}";*/
+
 		//解析Json
 		Map map = new HashMap();
 		try {
 			map = JsonUtil.analyzejson(json);
 			reqNo = map.get("req_no").toString();
-			roleId = map.get("org_id").toString();
+			roleId = map.get("role_id").toString();
 			accountId = map.get("account_id").toString();
 			operatorId = map.get("operator_id").toString();
 			if(EmptyUtils.isEmpty(reqNo) || EmptyUtils.isEmpty(accountId) || EmptyUtils.isEmpty(operatorId) || EmptyUtils.isEmpty(roleId)){
 				returnCode = ReturnCodeUtil.returnCode3;
 			}else {
 				userList = AuEmpOrgDao.dao.findUsersHaveRole(roleId);
+				//查询机构
+				orgList = AuOrganizationDao.dao.findAll();
+				//机构下用户
+				for(Record org : orgList){
+					String orgId = org.getStr("org_id");
+					String orgName = org.getStr("org_name");
+					JSONObject jo = new JSONObject();
+					jo.put("org_id",orgId);
+					jo.put("org_name",orgName);
+					joo.add(jo);
+				}
 				if (null == userList || userList.size() == 0) {
 
 				} else {
@@ -256,12 +285,28 @@ public class OrgEmpManageController extends Controller{
 	public void showNoRoleUser(){
 		//获取请求数据
 		String json = HttpKit.readData(getRequest());
+		/*String json = "{\n" +
+				"  \"jyau_content\": {\n" +
+				"    \"jyau_reqData\": [\n" +
+				"      {\n" +
+				"        \"req_no\": \"AU002201810231521335687\",\n" +
+				"        \"role_id\": \"1\"\n" +
+				"      }\n" +
+				"    ],\n" +
+				"    \"jyau_pubData\": {\n" +
+				"      \"operator_id\": \"1\",\n" +
+				"      \"ip_address\": \"10.2.0.116\",\n" +
+				"      \"account_id\": \"systemman\",\n" +
+				"      \"system_id\": \"10909\"\n" +
+				"    }\n" +
+				"  }\n" +
+				"}";*/
 		//解析Json
 		Map map = new HashMap();
 		try {
 			map = JsonUtil.analyzejson(json);
 			reqNo = map.get("req_no").toString();
-			roleId = map.get("org_id").toString();
+			roleId = map.get("role_id").toString();
 			accountId = map.get("account_id").toString();
 			operatorId = map.get("operator_id").toString();
 			if(EmptyUtils.isEmpty(reqNo) || EmptyUtils.isEmpty(accountId) || EmptyUtils.isEmpty(operatorId) || EmptyUtils.isEmpty(roleId)){
@@ -300,10 +345,35 @@ public class OrgEmpManageController extends Controller{
 		}
 	}
 
-	// 删除用户拥有的角色
+	// 删除指定角色的用户信息
 	public void delUserRole(){
 		//获取请求数据
 		String json = HttpKit.readData(getRequest());
+		/*String json = "{\n" +
+				"  \"jyau_content\": {\n" +
+				"    \"jyau_reqData\": [\n" +
+				"      {\n" +
+				"        \"req_no\": \"AU002201810231521335687\",\n" +
+				"        \"role_id\": \"1\",\n" +
+				"        \"oper_data\": [\n" +
+				"          {\n" +
+				"            \"oper_id\": \"7\"\n" +
+				"          },\n" +
+				"          {\n" +
+				"            \"oper_id\": \"8\"\n" +
+				"          }\n" +
+				"        ],\n" +
+				"        \n" +
+				"      }\n" +
+				"    ],\n" +
+				"    \"jyau_pubData\": {\n" +
+				"      \"operator_id\": \"1\",\n" +
+				"      \"ip_address\": \"10.2.0.116\",\n" +
+				"      \"account_id\": \"systemman\",\n" +
+				"      \"system_id\": \"10909\"\n" +
+				"    }\n" +
+				"  }\n" +
+				"}";*/
 		//解析Json
 		Map map = new HashMap();
 		try {
@@ -311,23 +381,44 @@ public class OrgEmpManageController extends Controller{
 			reqNo = map.get("req_no").toString();
 			accountId = map.get("account_id").toString();
 			operatorId = map.get("operator_id").toString();
+			roleId = map.get("role_id").toString();
 			operdata = map.get("oper_data").toString(); // 操作的数据
 
-			if(EmptyUtils.isEmpty(reqNo) || EmptyUtils.isEmpty(accountId) || EmptyUtils.isEmpty(operatorId) || EmptyUtils.isEmpty(operdata)){
+			if(EmptyUtils.isEmpty(reqNo) || EmptyUtils.isEmpty(accountId) || EmptyUtils.isEmpty(operatorId) || EmptyUtils.isEmpty(operdata) || EmptyUtils.isEmpty(roleId)){
 				returnCode = ReturnCodeUtil.returnCode3;
 			}else {
 				org.json.JSONArray jsonArrayUser = new org.json.JSONArray(operdata);
-				for (int i = 0; i < jsonArrayUser.length(); i++) {
-					String lation_id = jsonArrayUser.get(i).toString();
-
-
-				}
+				boolean suc = Db.tx(new IAtom() {
+					@Override
+					public boolean run() throws SQLException {
+						try {
+							for (int i = 0; i < jsonArrayUser.length(); i++) {
+								org.json.JSONObject jsonObject = (org.json.JSONObject) jsonArrayUser.get(i);
+								String lation_id = jsonObject.optString("oper_id");
+								Record delRecord = new Record();
+								delRecord.set("LA_ID",lation_id);
+								delRecord.set("RL_ID",roleId);
+								boolean delflag = AuEmpOrgDao.dao.delete(delRecord);
+								log.info("删除结果"+delflag);
+							}
+						}catch (Exception e){
+							e.printStackTrace();
+							log.error("删除角色下的用户失败：" + e.getMessage());
+							return false;
+						}
+						return true;
+					}
+				});
+				if (suc) returnCode = ReturnCodeUtil.returnCode;
+				else returnCode = ReturnCodeUtil.returnCode6;
 			}
-
+			returnOrgJson();
 		}catch (Exception e){
-
+			log.error(e.getMessage(), e);
+			returnCode = ReturnCodeUtil.returnCode2;
+			returnOrgJson();
 		}finally {
-
+			PubModelUtil.apiRecordBean(map,"AU023",json,jb.toString());
 		}
 
 	}
@@ -336,17 +427,84 @@ public class OrgEmpManageController extends Controller{
 	public void addUserRole(){
 		//获取请求数据
 		String json = HttpKit.readData(getRequest());
+		/*String json = "{\n" +
+				"  \"jyau_content\": {\n" +
+				"    \"jyau_reqData\": [\n" +
+				"      {\n" +
+				"        \"req_no\": \"AU002201810231521335687\",\n" +
+				"        \"role_id\": \"1\",\n" +
+				"        \"oper_data\": [\n" +
+				"          {\n" +
+				"            \"oper_id\": \"OP201805171417167818\",\n" +
+				"            \"org_id\": \"1\"\n" +
+				"          },\n" +
+				"          {\n" +
+				"            \"oper_id\": \"1\",\n" +
+				"            \"org_id\": \"OG201805171726129979\"\n" +
+				"          }\n" +
+				"        ],\n" +
+				"        \n" +
+				"      }\n" +
+				"    ],\n" +
+				"    \"jyau_pubData\": {\n" +
+				"      \"operator_id\": \"1\",\n" +
+				"      \"ip_address\": \"10.2.0.116\",\n" +
+				"      \"account_id\": \"systemman\",\n" +
+				"      \"system_id\": \"10909\"\n" +
+				"    }\n" +
+				"  }\n" +
+				"}";*/
 		//解析Json
 		Map map = new HashMap();
 		try {
 			map = JsonUtil.analyzejson(json);
+			reqNo = map.get("req_no").toString();
+			accountId = map.get("account_id").toString();
+			operatorId = map.get("operator_id").toString();
+			roleId = map.get("role_id").toString();
+			operdata = map.get("oper_data").toString(); // 操作的数据
+			if(EmptyUtils.isEmpty(reqNo) || EmptyUtils.isEmpty(accountId) || EmptyUtils.isEmpty(operatorId) || EmptyUtils.isEmpty(operdata)|| EmptyUtils.isEmpty(roleId)){
+				returnCode = ReturnCodeUtil.returnCode3;
+			}else {
+				org.json.JSONArray jsonArrayUser = new org.json.JSONArray(operdata);
+				boolean suc = Db.tx(new IAtom() {
+					@Override
+					public boolean run() throws SQLException {
+						try {
+							for (int i = 0; i < jsonArrayUser.length(); i++) {
+								org.json.JSONObject jsonObject = (org.json.JSONObject) jsonArrayUser.get(i);
+								String orgId = jsonObject.optString("org_id");
+								String operId = jsonObject.optString("oper_id");
+								Record addRecord = new Record();
+								addRecord.set("LA_ID", DatabaseUtil.getEntityPrimaryKey("LA"));
+								addRecord.set("ORG_ID", orgId);
+								addRecord.set("OP_OPRATORID", operId);
+								addRecord.set("RL_ID", roleId);
+								AuEmpOrgDao.dao.save(addRecord);
+							}
+						} catch (Exception e) {
+							log.error(e.getMessage(), e);
+							log.error("添加角色人员失败：" + e.getMessage());
+							returnOrgJson();
+							return false;
+						}
+						return true;
+					}
 
+				});
+				if (suc) returnCode = ReturnCodeUtil.returnCode;
+				else returnCode = ReturnCodeUtil.returnCode12;
+			}
+			returnOrgJson();
 		}catch (Exception e){
-
+			log.error(e.getMessage(), e);
+			returnCode = ReturnCodeUtil.returnCode2;
+			returnOrgJson();
 		}finally {
-
+			PubModelUtil.apiRecordBean(map,"AU023",json,jb.toString());
 		}
 	}
+
 
 	public void returnJson() {
 		returnMessage = JsonUtil.getDictName(dictList, returnCode);
@@ -378,6 +536,7 @@ public class OrgEmpManageController extends Controller{
 		returnMessage = JsonUtil.getDictName(dictList, returnCode);
 		jyau_oporgData.put("req_no", reqNo);
 		jyau_oporgData.put("users_data", userRoleArray);
+		jyau_oporgData.put("orgs_data", joo);
 		jsonArray.add(jyau_oporgData);
 		jb = JsonUtil.returnJson(jsonArray, returnCode, returnMessage);
 		renderJson(jb);

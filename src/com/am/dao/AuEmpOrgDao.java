@@ -27,7 +27,7 @@ public class AuEmpOrgDao implements IBaseDao {
 
 	@Override
 	public boolean delete(Record record) {
-		return false;
+		return Db.use(configName).delete(tableName,primaryKey,record);
 	}
 
 	@Override
