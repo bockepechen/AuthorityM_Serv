@@ -2,10 +2,6 @@ package com.am.dao;
 
 import com.jfinal.plugin.activerecord.Db;
 import com.jfinal.plugin.activerecord.Record;
-import com.sun.org.apache.bcel.internal.generic.TABLESWITCH;
-import org.apache.pdfbox.cos.COSName;
-
-import javax.naming.CompositeName;
 import java.util.List;
 
 /**
@@ -65,6 +61,14 @@ public class AuMenuDao implements  IBaseDao {
 		return Db.use(configName).update(sql,menuId);
 	}
 
+	/**
+	 * 查询菜单(父菜单为空即为一级菜单)
+	 */
+	public List<Record> queryMenu() {
+		String sql = "SELECT MU_ID AS menu_id ,MU_NAME as menu_name,MU_PARENTID AS parent_id FROM AU_MENU";
+		return Db.use(configName).find(sql);
+	}
+
 
 	/**
 	 * 查询角色机构可以操作的菜单
@@ -72,8 +76,8 @@ public class AuMenuDao implements  IBaseDao {
 	 * @param orgId
 	 * @return
 	 */
-	public List<Record> queryMenu(String roleId, String orgId){
+	/*public List<Record> queryMenu(String roleId, String orgId){
 		String sql = "SELECT m.MU_ID AS menu_id,m.MU_NAME AS menu_name,m.MU_ACTION AS menu_action FROM AU_MENU m LEFT JOIN AU_MENUORG mo ON mo.MU_ID = m.MU_ID  WHERE mo.ORG_ID = ? AND mo.RL_ID =?";
 		return Db.use(configName).find(sql,roleId,orgId);
-	}
+	}*/
 }
