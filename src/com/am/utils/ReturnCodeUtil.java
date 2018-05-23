@@ -1,6 +1,5 @@
 package com.am.utils;
 
-import com.jfinal.log.Log;
 
 /**
  * Created by ZHAO on 2018/5/14.
@@ -18,5 +17,6 @@ public class  ReturnCodeUtil {
 	public static String returnCode9 = "0007"; // 角色编号已经存在
 	public static String returnCode10 = "0008"; // 信息不存在
 	public static String returnCode11 = "0009"; // 当前登录账号已存在
+	public static String returnCode12 = "0010"; // 操作失败
 
 }
