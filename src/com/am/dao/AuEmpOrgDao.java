@@ -41,7 +41,7 @@ public class AuEmpOrgDao implements IBaseDao {
 	 * @return
 	 */
 	public  List<Record> findUserInOrg(String orgId){
-		String sql = "SELECT au.OP_OPRATORID AS operator_id,au.OP_NAME AS name FROM AU_OPERATOR au LEFT JOIN  AU_EMPORG ae ON au.OP_OPRATORID = ae.OP_OPRATORID WHERE ae.ORG_ID  = ?";
+		String sql = "SELECT DISTINCT au.OP_OPRATORID AS operator_id,au.OP_NAME AS name FROM AU_OPERATOR au LEFT JOIN  AU_EMPORG ae ON au.OP_OPRATORID = ae.OP_OPRATORID WHERE ae.ORG_ID  = ?";
 		return Db.use(configName).find(sql,orgId);
 	}
 	/**
@@ -50,7 +50,7 @@ public class AuEmpOrgDao implements IBaseDao {
 	 * @return
 	 */
 	public  List<Record> findUserNotOrg(String orgId){
-		String sql = "SELECT ao.OP_OPRATORID AS operator_id,ao.OP_NAME AS name FROM  AU_OPERATOR ao WHERE NOT  EXISTS (SELECT ae.OP_OPRATORID FROM  AU_EMPORG ae WHERE ae.ORG_ID =? AND ae.OP_OPRATORID = ao.OP_OPRATORID)";
+		String sql = "SELECT ao.OP_OPRATORID AS operator_id,ao.OP_NAME AS name FROM  AU_OPERATOR ao WHERE NOT  EXISTS (SELECT DISTINCT ae.OP_OPRATORID FROM  AU_EMPORG ae WHERE ae.ORG_ID =? AND ae.OP_OPRATORID = ao.OP_OPRATORID)";
 		return Db.use(configName).find(sql,orgId);
 	}
 
@@ -75,5 +75,16 @@ public class AuEmpOrgDao implements IBaseDao {
 		//String sql = "SELECT s1.OP_OPRATORID,s1.OP_ACCOUNT,s1.OP_NAME,r1.ORG_ID,r1.ORG_NAME FROM (SELECT p.OP_OPRATORID,p.OP_ACCOUNT,p.OP_NAME FROM AU_OPERATOR p WHERE p.OP_STATUS = '01' AND p.OP_IFOPERATOR = '1' AND NOT EXISTS (SELECT r.OP_OPRATORID,r.ORG_ID FROM AU_EMPORG r WHERE r.OP_OPRATORID = p.OP_OPRATORID AND r.RL_ID = ? ))s1 LEFT JOIN (SELECT l.*,o.ORG_NAME,o.ORG_CODE FROM AU_EMPORG l,AU_ORGANIZATION o WHERE l.ORG_ID = o.ORG_ID )r1 on s1.OP_OPRATORID = r1.OP_OPRATORID ";
 		String sql = "SELECT s1.OP_OPRATORID,s1.OP_ACCOUNT,s1.OP_NAME,o.ORG_ID,o.ORG_NAME FROM (SELECT p.OP_OPRATORID,p.OP_ACCOUNT,p.OP_NAME FROM AU_OPERATOR p WHERE p.OP_STATUS = '01' AND p.OP_IFOPERATOR = '1' AND NOT EXISTS (SELECT r.OP_OPRATORID,r.ORG_ID FROM AU_EMPORG r WHERE r.OP_OPRATORID = p.OP_OPRATORID AND r.RL_ID = ? ))s1,AU_EMPORG l,AU_ORGANIZATION o WHERE l.ORG_ID = o.ORG_ID AND s1.OP_OPRATORID = l.OP_OPRATORID ";
 		return Db.use(configName).find(sql,roleId);
+	}
+
+	/**
+	 * 根据机构和用户编号查询
+	 * @param orgId
+	 * @param operatorId
+	 * @return
+	 */
+	public  List<Record> findUserByOrgOper(String orgId,String operatorId){
+		String sql = "SELECT * FROM AU_EMPORG WHERE ORG_ID = ? AND OP_OPRATORID = ?";
+		return Db.use(configName).find(sql,orgId,operatorId);
 	}
 }

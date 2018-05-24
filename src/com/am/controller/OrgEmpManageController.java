@@ -159,17 +159,17 @@ public class OrgEmpManageController extends Controller{
 	public void addOperator(){
 		//获取请求数据
 		String json = HttpKit.readData(getRequest());
-		/*String json = "{\n" +
-				"\n" +
+/*		String json = "{\n" +
 				"\t\"jyau_content\": {\n" +
 				"\t\t\"jyau_reqData\": [{\n" +
-				"\t\t\t\"req_no\": \" AU001201810231521335687\",\n" +
-				"\t\t\t\"org_id\": \"OG201805171726129979\"\n" +
+				"\t\t\t\"req_no\": \"AU002201810231521335687\",\n" +
+				"\t\t\t\"org_id\": \"1\",\n" +
+				"\t\t\t\"oper_ids\": [\"OP201805171417167818\", \"1\"]\n" +
 				"\t\t}],\n" +
 				"\t\t\"jyau_pubData\": {\n" +
 				"\t\t\t\"operator_id\": \"1\",\n" +
-				"\t\t\t\"account_id\": \"systemman\",\n" +
 				"\t\t\t\"ip_address\": \"10.2.0.116\",\n" +
+				"\t\t\t\"account_id\": \"systemman\",\n" +
 				"\t\t\t\"system_id\": \"10909\"\n" +
 				"\t\t}\n" +
 				"\t}\n" +
@@ -182,12 +182,30 @@ public class OrgEmpManageController extends Controller{
 			orgId = map.get("org_id").toString();
 			accountId = map.get("account_id").toString();
 			operatorId = map.get("operator_id").toString();
-			if(EmptyUtils.isEmpty(reqNo) || EmptyUtils.isEmpty(orgId) || EmptyUtils.isEmpty(accountId) || EmptyUtils.isEmpty(operatorId)){
+			operdata = map.get("oper_ids").toString();
+			if(EmptyUtils.isEmpty(reqNo) || EmptyUtils.isEmpty(orgId) || EmptyUtils.isEmpty(accountId) || EmptyUtils.isEmpty(operatorId)
+					|| EmptyUtils.isEmpty(operdata)){
 				returnCode = ReturnCodeUtil.returnCode3;
 			}else {
-				//调用机构添加人员业务逻辑
-				OrgEmpRoleService.service.insertOrgUser(orgId,operatorId);
-				returnCode = ReturnCodeUtil.returnCode;
+				org.json.JSONArray jsonArrayUser = new org.json.JSONArray(operdata);
+				boolean suc = Db.tx(new IAtom() {
+					@Override
+					public boolean run() throws SQLException {
+						try {
+							//调用机构添加人员业务逻辑
+							OrgEmpRoleService.service.insertOrgUser(orgId,jsonArrayUser);
+						} catch (Exception e) {
+							log.error(e.getMessage(), e);
+							log.error("添加机构人员失败：" + e.getMessage());
+							returnOrgJson();
+							return false;
+						}
+						return true;
+					}
+
+				});
+				if (suc) returnCode = ReturnCodeUtil.returnCode;
+				else returnCode = ReturnCodeUtil.returnCode12;
 			}
 			returnOrgJson();
 		} catch (Exception e) {
@@ -197,6 +215,65 @@ public class OrgEmpManageController extends Controller{
 		} finally {
 			PubModelUtil.apiRecordBean(map,"AU016",json,jb.toString());
 		}
+	}
+
+	// 机构删除人员
+	public void delOperator(){
+		//获取请求数据
+		String json = HttpKit.readData(getRequest());
+			/*String json = "{\n" +
+				"\t\"jyau_content\": {\n" +
+				"\t\t\"jyau_reqData\": [{\n" +
+				"\t\t\t\"req_no\": \"AU002201810231521335687\",\n" +
+				"\t\t\t\"org_id\": \"1\",\n" +
+				"\t\t\t\"oper_ids\": [\"OP201805171417167818\", \"1\"]\n" +
+				"\t\t}],\n" +
+				"\t\t\"jyau_pubData\": {\n" +
+				"\t\t\t\"operator_id\": \"1\",\n" +
+				"\t\t\t\"ip_address\": \"10.2.0.116\",\n" +
+				"\t\t\t\"account_id\": \"systemman\",\n" +
+				"\t\t\t\"system_id\": \"10909\"\n" +
+				"\t\t}\n" +
+				"\t}\n" +
+				"}";*/
+		//解析Json
+		Map map = new HashMap();
+		try {
+			map = JsonUtil.analyzejson(json);
+			reqNo = map.get("req_no").toString();
+			orgId = map.get("org_id").toString();
+			accountId = map.get("account_id").toString();
+			operatorId = map.get("operator_id").toString();
+			operdata = map.get("oper_ids").toString();
+			if(EmptyUtils.isEmpty(reqNo) || EmptyUtils.isEmpty(accountId) || EmptyUtils.isEmpty(operatorId) || EmptyUtils.isEmpty(operdata) || EmptyUtils.isEmpty(orgId)){
+				returnCode = ReturnCodeUtil.returnCode3;
+			}else {
+				org.json.JSONArray jsonArrayUser = new org.json.JSONArray(operdata);
+				boolean suc = Db.tx(new IAtom() {
+					@Override
+					public boolean run() throws SQLException {
+						try {
+							OrgEmpRoleService.service.deleteOrgUser(orgId,jsonArrayUser);
+						}catch (Exception e){
+							e.printStackTrace();
+							log.error("删除角色下的用户失败：" + e.getMessage());
+							return false;
+						}
+						return true;
+					}
+				});
+				if (suc) returnCode = ReturnCodeUtil.returnCode;
+				else returnCode = ReturnCodeUtil.returnCode6;
+			}
+			returnOrgJson();
+		}catch (Exception e){
+			log.error(e.getMessage(), e);
+			returnCode = ReturnCodeUtil.returnCode2;
+			returnOrgJson();
+		}finally {
+			PubModelUtil.apiRecordBean(map,"AU023",json,jb.toString());
+		}
+
 	}
 
 	//展示某个角色已经拥有的用户列表信息
@@ -526,6 +603,7 @@ public class OrgEmpManageController extends Controller{
 	public void returnOrgJson() {
 		returnMessage = JsonUtil.getDictName(dictList, returnCode);
 		jyau_oporgData.put("req_no", reqNo);
+		jyau_oporgData.put("operator_id", operatorId);
 		jsonArray.add(jyau_oporgData);
 		jb = JsonUtil.returnJson(jsonArray, returnCode, returnMessage);
 		renderJson(jb);
