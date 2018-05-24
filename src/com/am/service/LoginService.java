@@ -32,11 +32,13 @@ public class LoginService {
 			String operatorId = auopRecord.getStr("OP_OPRATORID");
 			Date lastLogin = auopRecord.getDate("OP_LOGINTIME");
 			String lastip = auopRecord.getStr("OP_LOGINIP");
+			String name = auopRecord.getStr("OP_NAME");
 			List<Record> orgList = AuOperatorDao.dao.queryOrgByOperatorId(operatorId);
 			//更新表登录时间以及IP
 			updateOperator(operatorId, ip);
 			String returnCode = ReturnCodeUtil.returnCode;
 			map.put("operatorId",operatorId);
+			map.put("name",name);
 			map.put("lastLogin",lastLogin);
 			map.put("lastIp",lastip);
 			map.put("orgList",orgList);

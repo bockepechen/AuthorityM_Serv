@@ -24,6 +24,7 @@ public class LoginController extends Controller {
 	String operatorId = "";//用户编号
 	String accountId = "";//登录账号
 	String pwd = "";//账户密码
+	String name = "";//用户姓名
 	String ip = "";//当前IP
 	String lastIp = "";//上次登录Ip
 	String lastLogin = "";//上次登录时间
@@ -72,6 +73,7 @@ public class LoginController extends Controller {
 				returnCode = loginMap.get("returnCode").toString();
 				if(returnCode.equals("0000")) {
 					operatorId = loginMap.get("operatorId").toString();
+					name = loginMap.get("name").toString();
 					if (null != loginMap.get("lastIp")) {
 						lastIp = loginMap.get("lastIp").toString();
 					}
@@ -95,6 +97,8 @@ public class LoginController extends Controller {
 		returnMessage = JsonUtil.getDictName(dictList, returnCode);
 		jyau_loginData.put("req_no", reqNo);
 		jyau_loginData.put("operator_id", operatorId);
+		jyau_loginData.put("name", name);
+		jyau_loginData.put("account_id", accountId);
 		jyau_loginData.put("last_ip", lastIp);
 		jyau_loginData.put("last_login", lastLogin);
 		jyau_loginData.put("org_list", orgList);

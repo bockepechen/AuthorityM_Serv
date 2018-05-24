@@ -35,12 +35,12 @@ public class MenuController extends Controller{
 	String ifLeaf = "";//是否子菜单-0否1是
 	String parentName = "";//父级菜单显示名称
 	String parentId = "";//父级菜单编号
-	//String roleId = "";//角色编号
-	//String roleName = "";//角色名称
+	String menuAction = "";//菜单功能调用接口
 	List<Record> menuList = null;//显示菜单列表
 	String returnCode = "";//返回码
 	String returnMessage = "";//返回信息
 	JSONArray dictList = CacheKit.get("dataCache","s_dict_returncode");
+	JSONArray actionList = CacheKit.get("dataCache","s_dict_sysparams");
 	JSONObject jb = new JSONObject();
 
 	JSONArray jsonArray = new JSONArray();
@@ -141,7 +141,7 @@ public class MenuController extends Controller{
 				"\t\"jyau_content\": {\n" +
 				"\t\t\" jyau_reqData\": [{\n" +
 				"\t\t\t\"req_no\": \"AU2018048201802051125231351\",\n" +
-				"\t\t\t\"menu_id\": \"1\"\n" +
+				"\t\t\t\"menu_id\": \"MU201805231036299192\"\n" +
 				"\t\t}],\n" +
 				"\t\t\"jyau_pubData\": {\n" +
 				"\n" +
@@ -172,8 +172,13 @@ public class MenuController extends Controller{
 					menuName = menuRecord.getStr("MU_NAME");
 					menuCode = menuRecord.getStr("MU_CODE");
 					ifLeaf = menuRecord.getStr("MU_IFLEAF");
+					String mAction  = menuRecord.getStr("MU_ACTION");
 					if(null != menuRecord.getInt("MU_DISPLAYORDER")){
 						displayOrder = menuRecord.getInt("MU_DISPLAYORDER").toString();
+					}
+					if(EmptyUtils.isNotEmpty(mAction)){
+						String preFix = JsonUtil.getDictName(actionList,"url");
+						menuAction = preFix + mAction;
 					}
 				}
 				returnCode = ReturnCodeUtil.returnCode;
@@ -204,6 +209,7 @@ public class MenuController extends Controller{
 				"\t\t\t\"menu_code\": \"10101\",\n" +
 				"\t\t\t\"if_leaf\": \"1\",\n" +
 				"\t\t\t\"display_order\": \"1\",\n" +
+				"\t\t\t\"menu_action\": \"1\",\n" +
 				"\t\t\t\"type\": \"01\"\n" +
 				"\t\t}],\n" +
 				"\t\t\"jyau_pubData\": {\n" +
@@ -227,15 +233,16 @@ public class MenuController extends Controller{
 			menuCode = map.get("menu_code").toString();
 			ifLeaf = map.get("if_leaf").toString();
 			displayOrder = map.get("display_order").toString();
+			menuAction = map.get("menu_action").toString();
 			operatorId = map.get("operator_id").toString();
 			if(!ifCheck(reqNo,operatorId,menuName,menuCode,ifLeaf,displayOrder,type,menuId)){
 				returnCode = ReturnCodeUtil.returnCode3;
 			}else {
 				if(type.equals("01")) {//新增菜单--增子菜单,需要传parentId
-					MenuService.service.InsertMenu(menuName, menuCode, ifLeaf, displayOrder, parentId);
+					MenuService.service.InsertMenu(menuName, menuCode, ifLeaf, displayOrder, parentId,menuAction);
 					returnCode = ReturnCodeUtil.returnCode;
 				}else{//修改,传menuId
-					MenuService.service.UpdateMenu(menuName, menuCode, ifLeaf, displayOrder, menuId);
+					MenuService.service.UpdateMenu(menuName, menuCode, ifLeaf, displayOrder, menuId,menuAction);
 					returnCode = ReturnCodeUtil.returnCode;
 				}
 			}
@@ -297,6 +304,7 @@ public class MenuController extends Controller{
 		jyau_menuData.put("menu_code",menuCode);
 		jyau_menuData.put("if_leaf",ifLeaf);
 		jyau_menuData.put("display_order",displayOrder);
+		jyau_menuData.put("menu_action",menuAction);
 		jsonArray.add(jyau_menuData);
 		jb = JsonUtil.returnJson(jsonArray,returnCode,returnMessage);
 		renderJson(jb);
