@@ -11,9 +11,12 @@ import com.am.utils.ReturnCodeUtil;
 import com.jfinal.core.Controller;
 import com.jfinal.kit.HttpKit;
 import com.jfinal.log.Log;
+import com.jfinal.plugin.activerecord.Db;
+import com.jfinal.plugin.activerecord.IAtom;
 import com.jfinal.plugin.activerecord.Record;
 import com.jfinal.plugin.ehcache.CacheKit;
 
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -117,8 +120,22 @@ public class MenuController extends Controller{
 			if(EmptyUtils.isEmpty(reqNo) || EmptyUtils.isEmpty(operatorId) || EmptyUtils.isEmpty(menuId)){
 				returnCode = ReturnCodeUtil.returnCode3;
 			}else{
-				MenuService.service.deleteMenu(menuId);
-				returnCode = ReturnCodeUtil.returnCode;
+				boolean suc = Db.tx(new IAtom() {
+					@Override
+					public boolean run() throws SQLException {
+						try {
+							MenuService.service.deleteMenu(menuId);
+						} catch (Exception e) {
+							log.error(e.getMessage(), e);
+							log.error("删除菜单失败：" + e.getMessage());
+							return false;
+						}
+						return true;
+					}
+
+				});
+				if (suc) returnCode = ReturnCodeUtil.returnCode;
+				else returnCode = ReturnCodeUtil.returnCode12;
 			}
 			returnDelJson();
 		}catch (Exception e){
@@ -238,13 +255,26 @@ public class MenuController extends Controller{
 			if(!ifCheck(reqNo,operatorId,menuName,menuCode,ifLeaf,displayOrder,type,menuId)){
 				returnCode = ReturnCodeUtil.returnCode3;
 			}else {
-				if(type.equals("01")) {//新增菜单--增子菜单,需要传parentId
-					MenuService.service.InsertMenu(menuName, menuCode, ifLeaf, displayOrder, parentId,menuAction);
-					returnCode = ReturnCodeUtil.returnCode;
-				}else{//修改,传menuId
-					MenuService.service.UpdateMenu(menuName, menuCode, ifLeaf, displayOrder, menuId,menuAction);
-					returnCode = ReturnCodeUtil.returnCode;
-				}
+				boolean suc = Db.tx(new IAtom() {
+					@Override
+					public boolean run() throws SQLException {
+						try {
+							if(type.equals("01")) {//新增菜单--增子菜单,需要传parentId
+								MenuService.service.InsertMenu(menuName, menuCode, ifLeaf, displayOrder, parentId,menuAction);
+							}else{//修改,传menuId
+								MenuService.service.UpdateMenu(menuName, menuCode, ifLeaf, displayOrder, menuId,menuAction);
+							}
+						} catch (Exception e) {
+							log.error(e.getMessage(), e);
+							log.error("添加修改菜单失败：" + e.getMessage());
+							return false;
+						}
+						return true;
+					}
+
+				});
+				if (suc) returnCode = ReturnCodeUtil.returnCode;
+				else returnCode = ReturnCodeUtil.returnCode12;
 			}
 			returnDelJson();
 		}catch (Exception e){

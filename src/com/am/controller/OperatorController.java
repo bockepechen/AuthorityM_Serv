@@ -11,10 +11,13 @@ import com.am.utils.ReturnCodeUtil;
 import com.jfinal.core.Controller;
 import com.jfinal.kit.HttpKit;
 import com.jfinal.log.Log;
+import com.jfinal.plugin.activerecord.Db;
+import com.jfinal.plugin.activerecord.IAtom;
 import com.jfinal.plugin.activerecord.Record;
 import com.jfinal.plugin.ehcache.CacheKit;
 import com.jfinal.weixin.sdk.api.ReturnCode;
 
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -180,19 +183,34 @@ public class OperatorController extends Controller {
 			if(!ifCheck(reqNo,type,operatorId,status,ifAdimn,account,pwd)){
 				returnCode = ReturnCodeUtil.returnCode3;
 			}else {
-				if(type.equals("01")){//新增
-					//查询登录账号是否存在
-					Record operRecord = AuOperatorDao.dao.queryByaccountId(account);
-					if(null != operRecord){
-						returnCode = ReturnCodeUtil.returnCode11;
-					}else{
-						operatorId = OperatorService.service.operatorInterestBiz(account,name,pwd,status,ifAdimn);
-						returnCode = ReturnCodeUtil.returnCode;
+				boolean suc = Db.tx(new IAtom() {
+					@Override
+					public boolean run() throws SQLException {
+						try {
+							if(type.equals("01")){//新增
+								//查询登录账号是否存在
+								Record operRecord = AuOperatorDao.dao.queryByaccountId(account);
+								if(null != operRecord){
+									returnCode = ReturnCodeUtil.returnCode11;
+								}else{
+									operatorId = OperatorService.service.operatorInterestBiz(account,name,pwd,status,ifAdimn);
+									returnCode = ReturnCodeUtil.returnCode;
+								}
+							}else{//修改
+								OperatorService.service.operatorModifyBiz(operatorId,account,name,pwd,status,ifAdimn);
+								returnCode = ReturnCodeUtil.returnCode;
+							}
+						} catch (Exception e) {
+							log.error(e.getMessage(), e);
+							log.error("添加修改用户失败：" + e.getMessage());
+							return false;
+						}
+						return true;
 					}
-				}else{//修改
-					OperatorService.service.operatorModifyBiz(operatorId,account,name,pwd,status,ifAdimn);
-					returnCode = ReturnCodeUtil.returnCode;
-				}
+
+				});
+				if (suc) returnCode = ReturnCodeUtil.returnCode;
+				else returnCode = ReturnCodeUtil.returnCode12;
 			}
 			returnModifyJson();
 		} catch (Exception e) {
@@ -238,8 +256,22 @@ public class OperatorController extends Controller {
 			if(EmptyUtils.isEmpty(reqNo) || EmptyUtils.isEmpty(operatorId)){
 				returnCode = ReturnCodeUtil.returnCode3;
 			}else {
-				OperatorService.service.operatorDeleteBiz(operatorId);
-				returnCode = ReturnCodeUtil.returnCode;
+				boolean suc = Db.tx(new IAtom() {
+					@Override
+					public boolean run() throws SQLException {
+						try {
+							OperatorService.service.operatorDeleteBiz(operatorId);
+						} catch (Exception e) {
+							log.error(e.getMessage(), e);
+							log.error("删除用户失败：" + e.getMessage());
+							return false;
+						}
+						return true;
+					}
+
+				});
+				if (suc) returnCode = ReturnCodeUtil.returnCode;
+				else returnCode = ReturnCodeUtil.returnCode12;
 			}
 			returnDeleteJson();
 		} catch (Exception e) {
