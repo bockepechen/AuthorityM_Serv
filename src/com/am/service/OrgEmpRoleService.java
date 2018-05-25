@@ -22,13 +22,17 @@ public class OrgEmpRoleService {
 	 * @return
 	 */
 	public void insertOrgUser(String orgId, org.json.JSONArray jsonArrayUser) {
+		//机构添加人员--先查是否有，不能添加重复的
 		for (int i = 0; i < jsonArrayUser.length(); i++) {
 			String operId = jsonArrayUser.get(i).toString();
-			Record addRecord = new Record();
-			addRecord.set("LA_ID", DatabaseUtil.getEntityPrimaryKey("LA"));
-			addRecord.set("ORG_ID", orgId);
-			addRecord.set("OP_OPRATORID", operId);
-			AuEmpOrgDao.dao.save(addRecord);
+			List<Record> empOrgRecordList = AuEmpOrgDao.dao.findUserByOrgOper(orgId,operId);
+			if(null == empOrgRecordList || empOrgRecordList.size()==0){
+				Record addRecord = new Record();
+				addRecord.set("LA_ID", DatabaseUtil.getEntityPrimaryKey("LA"));
+				addRecord.set("ORG_ID", orgId);
+				addRecord.set("OP_OPRATORID", operId);
+				AuEmpOrgDao.dao.save(addRecord);
+			}
 		}
 	}
 

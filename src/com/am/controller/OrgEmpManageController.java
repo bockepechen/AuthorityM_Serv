@@ -47,7 +47,7 @@ public class OrgEmpManageController extends Controller{
 	JSONObject jyau_oporgData = new JSONObject();
 	JSONArray joo = new JSONArray();
 	/**
-	 * 1.查询机构用户列表2.查询无机构人员（查询员工表机构为空的）
+	 * 1.查询机构用户列表2.查询无机构人员
 	 */
 	public void index(){
 		//获取请求数据
@@ -595,6 +595,8 @@ public class OrgEmpManageController extends Controller{
 	public void returnNotOrgJson() {
 		returnMessage = JsonUtil.getDictName(dictList, returnCode);
 		jyau_oporgData.put("req_no", reqNo);
+		jyau_oporgData.put("account_id", accountId);
+		jyau_oporgData.put("operator_id", operatorId);
 		jyau_oporgData.put("notorg_list", notOrgList);
 		jsonArray.add(jyau_oporgData);
 		jb = JsonUtil.returnJson(jsonArray, returnCode, returnMessage);
