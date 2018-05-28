@@ -434,10 +434,10 @@ public class OrgEmpManageController extends Controller{
 				"        \"role_id\": \"1\",\n" +
 				"        \"oper_data\": [\n" +
 				"          {\n" +
-				"            \"oper_id\": \"7\"\n" +
+				"            \"lation_id\": \"7\"\n" +
 				"          },\n" +
 				"          {\n" +
-				"            \"oper_id\": \"8\"\n" +
+				"            \"lation_id\": \"8\"\n" +
 				"          }\n" +
 				"        ],\n" +
 				"        \n" +
@@ -471,7 +471,7 @@ public class OrgEmpManageController extends Controller{
 						try {
 							for (int i = 0; i < jsonArrayUser.length(); i++) {
 								org.json.JSONObject jsonObject = (org.json.JSONObject) jsonArrayUser.get(i);
-								String lation_id = jsonObject.optString("oper_id");
+								String lation_id = jsonObject.optString("lation_id");
 								Record delRecord = new Record();
 								delRecord.set("LA_ID",lation_id);
 								delRecord.set("RL_ID",roleId);

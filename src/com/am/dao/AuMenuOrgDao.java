@@ -73,5 +73,16 @@ public class AuMenuOrgDao implements IBaseDao{
 		return Db.use(configName).find(sql,orgId,operatorId,orgId);
 	}
 
+	/**
+	 * 根据菜单ID删除菜单-角色-机构删除关系
+	 * @param menuId 菜单ID
+	 * @return
+	 */
+	public boolean deleteByMenuId(String menuId) {
+		Record record = new Record();
+		record.set("MU_ID",menuId);
+		return Db.use(configName).delete(tableName,primaryKey,record);
+	}
+
 
 }

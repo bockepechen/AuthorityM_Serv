@@ -35,6 +35,11 @@ public class AuRoleDao implements IBaseDao{
 		return Db.use(configName).find(sql);
 	}
 
+	public List<Record> findAllRole(){
+		String sql = "SELECT RL_ID as role_id,RL_NAME as role_name FROM AU_ROLE";
+		return Db.use(configName).find(sql);
+	}
+
 	/**
 	 * 根据用户所选机构查询用户角色
 	 * @param operatorId
