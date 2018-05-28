@@ -3,13 +3,17 @@ package com.am.controller;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.am.dao.AuOrganizationDao;
+import com.am.service.OrgService;
 import com.am.utils.*;
 import com.jfinal.core.Controller;
 import com.jfinal.kit.HttpKit;
 import com.jfinal.log.Log;
+import com.jfinal.plugin.activerecord.Db;
+import com.jfinal.plugin.activerecord.IAtom;
 import com.jfinal.plugin.activerecord.Record;
 import com.jfinal.plugin.ehcache.CacheKit;
 
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -259,7 +263,7 @@ public class OrgController extends Controller {
 				"    \"jyau_reqData\": [\n" +
 				"      {\n" +
 				"        \"req_no\": \"AU004201802051125231351\",\n" +
-				"        \"org_id\": \"3\"\n" +
+				"        \"org_id\": \"666\"\n" +
 				"      }\n" +
 				"    ],\n" +
 				"    \"jyau_pubData\": {\n" +
@@ -282,14 +286,22 @@ public class OrgController extends Controller {
 			if(EmptyUtils.isEmpty(reqNo) || EmptyUtils.isEmpty(accountId) || EmptyUtils.isEmpty(operatorId) || EmptyUtils.isEmpty(orgId)){
 				returnCode = ReturnCodeUtil.returnCode3;
 			}else {
-				Record delOrg = new Record();
-				delOrg.set("ORG_ID",orgId);
-				boolean delRecord = AuOrganizationDao.dao.delete(delOrg);
-				if(delRecord){
-					returnCode = ReturnCodeUtil.returnCode;
-				}else {
-					returnCode = ReturnCodeUtil.returnCode6;
-				}
+				boolean suc = Db.tx(new IAtom() {
+					@Override
+					public boolean run() throws SQLException {
+						try {
+							//调用删除机构业务逻辑
+							OrgService.service.delOrg(orgId);
+						} catch (Exception e) {
+							log.error(e.getMessage(), e);
+							log.error("删除机构失败：" + e.getMessage());
+							return false;
+						}
+						return true;
+					}
+				});
+				if (suc) returnCode = ReturnCodeUtil.returnCode;
+				else returnCode = ReturnCodeUtil.returnCode6;
 			}
 			returnOperJson();
 		}catch (Exception e){
@@ -301,16 +313,6 @@ public class OrgController extends Controller {
 		}
 
 	}
-
-	// /**
-	//  * 添加机构人员
-	//  */
-	// public void addOrgUser(){
-	// 	//获取请求数据
-	// 	String json = HttpKit.readData(getRequest());
-	//
-	//
-	// }
 
 	// 机构显示返回的json
 	public void returnJson() {

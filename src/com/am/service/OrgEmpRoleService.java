@@ -47,10 +47,12 @@ public class OrgEmpRoleService {
 		for (int i = 0; i < jsonArrayUser.length(); i++) {
 			String operatorId = jsonArrayUser.get(i).toString();
 			List<Record> empOrgRecordList = AuEmpOrgDao.dao.findUserByOrgOper(orgId,operatorId);
-			for(Record record :empOrgRecordList){
-				record.set("OP_OPRATORID", operatorId);
-				record.set("ORG_ID", orgId);
-				AuEmpOrgDao.dao.delete(record);
+			if(null != empOrgRecordList || empOrgRecordList.size()!=0) {
+				for (Record record : empOrgRecordList) {
+					record.set("OP_OPRATORID", operatorId);
+					record.set("ORG_ID", orgId);
+					AuEmpOrgDao.dao.delete(record);
+				}
 			}
 		}
 	}

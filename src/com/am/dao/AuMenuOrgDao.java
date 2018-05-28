@@ -85,4 +85,13 @@ public class AuMenuOrgDao implements IBaseDao{
 	}
 
 
+	/**
+	 * 根据机构编号删除
+	 * @param orgId
+	 * @return
+	 */
+	public int deleteByOrg(String orgId){
+		String sql = "DELETE  FROM AU_MENUORG WHERE ORG_ID = ?";
+		return Db.use(configName).update(sql,orgId);
+	}
 }

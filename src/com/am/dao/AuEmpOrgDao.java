@@ -87,4 +87,14 @@ public class AuEmpOrgDao implements IBaseDao {
 		String sql = "SELECT * FROM AU_EMPORG WHERE ORG_ID = ? AND OP_OPRATORID = ?";
 		return Db.use(configName).find(sql,orgId,operatorId);
 	}
+
+	/**
+	 * 根据机构编号删除
+	 * @param orgId
+	 * @return
+	 */
+	public  int deleteByOrg(String orgId){
+		String sql = "DELETE  FROM AU_EMPORG WHERE ORG_ID = ?";
+		return Db.use(configName).update(sql,orgId);
+	}
 }
