@@ -111,6 +111,7 @@ public class MenuAuthController extends Controller{
 				for (MenuBean entity : resultList) {
 					entity.setChild_list(getChild(entity.getMenu_id(),mbList));
 				}
+				returnCode = ReturnCodeUtil.returnCode;
 			}
 			returnMenuJson();
 		}catch (Exception e){
