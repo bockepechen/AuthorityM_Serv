@@ -53,12 +53,6 @@ public class MenuAuthController extends Controller{
 
 
 	JSONArray userRoleArray = new JSONArray(); // 返回拥有角色的用户listJson
-
-
-
-
-
-
 	//显示菜单层次列表
 	public void index(){
 		//获取请求数据
@@ -133,7 +127,7 @@ public class MenuAuthController extends Controller{
 				"\t\"jyau_content\": {\n" +
 				"\t\t\" jyau_reqData\": [{\n" +
 				"\t\t\t\"req_no\": \"CL048201802051125231351\",\n" +
-				"\t\t\t\"menu_id\": \"1\"\n" +
+				"\t\t\t\"menu_id\": \"MU201805291413135112\"\n" +
 				"\t\t}],\n" +
 				"\t\t\"jyau_pubData\": {\n" +
 				"\n" +
@@ -185,7 +179,7 @@ public class MenuAuthController extends Controller{
 			roleJsonObject.put("role_Name", roleName);
 
 			List<Record> roleOrgList = null; // 角色对应的orgList
-			roleOrgList = AuMenuOrgDao.dao.findOrgByRole(roleId);
+			roleOrgList = AuMenuOrgDao.dao.findOrgByRole(roleId,menuId);
 			JSONArray roleOrgArray = new JSONArray(); // 返回角色拥有的机构listJson
 			for (Record org : roleOrgList){
 				JSONObject orgJsonObject = new JSONObject();

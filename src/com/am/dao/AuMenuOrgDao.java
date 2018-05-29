@@ -49,9 +49,9 @@ public class AuMenuOrgDao implements IBaseDao{
 	 * @param roleId
 	 * @return
 	 */
-	public List<Record> findOrgByRole(String roleId){
-		String sql = "SELECT DISTINCT mo.ORG_ID AS org_id,ao.ORG_NAME AS org_name FROM AU_MENUORG mo LEFT JOIN AU_ORGANIZATION ao ON ao.ORG_ID = mo.ORG_ID WHERE RL_ID = ?";
-		return Db.use(configName).find(sql,roleId);
+	public List<Record> findOrgByRole(String roleId,String menuId){
+		String sql = "SELECT DISTINCT mo.ORG_ID AS org_id,ao.ORG_NAME AS org_name FROM AU_MENUORG mo LEFT JOIN AU_ORGANIZATION ao ON ao.ORG_ID = mo.ORG_ID WHERE RL_ID = ? AND MU_ID = ?";
+		return Db.use(configName).find(sql,roleId,menuId);
 	}
 	/**
 	 * 查询菜单角色机构表
@@ -78,10 +78,9 @@ public class AuMenuOrgDao implements IBaseDao{
 	 * @param menuId 菜单ID
 	 * @return
 	 */
-	public boolean deleteByMenuId(String menuId) {
-		Record record = new Record();
-		record.set("MU_ID",menuId);
-		return Db.use(configName).delete(tableName,primaryKey,record);
+	public int deleteByMenuId(String menuId) {
+		String sql = "DELETE  FROM AU_MENUORG WHERE MU_ID = ?";
+		return Db.use(configName).update(sql,menuId);
 	}
 
 
