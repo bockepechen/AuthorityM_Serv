@@ -93,4 +93,15 @@ public class AuMenuOrgDao implements IBaseDao{
 		String sql = "DELETE  FROM AU_MENUORG WHERE ORG_ID = ?";
 		return Db.use(configName).update(sql,orgId);
 	}
+
+
+	/**
+	 * 查询角色对应的菜单
+	 * @param roleId
+	 * @return
+	 */
+	public List<Record> findMenuByRole(String roleId){
+		String sql = "SELECT DISTINCT mo.MU_ID AS menu_id,am.MU_NAME AS menu_name FROM AU_MENUORG mo LEFT JOIN AU_MENU am ON am.MU_ID = mo.MU_ID WHERE RL_ID = ?";
+		return Db.use(configName).find(sql,roleId);
+	}
 }

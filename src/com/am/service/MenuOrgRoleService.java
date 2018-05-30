@@ -13,18 +13,15 @@ public class MenuOrgRoleService{
 	private Log log = Log.getLog(MenuOrgRoleService.class);
 
 	//菜单授权业务逻辑
-	public void menuAuth(String menuId,String roleId,String orgId){
-		//先查询是否存在
-		Record record = AuMenuOrgDao.dao.findMenuOrg(menuId,roleId,orgId);
-		if(null == record){
+	public void menuAuth(String menuId,String roleId,String orgdata){
+		// 删除menuId,roleId 对应的配置
+		AuMenuOrgDao.dao.deleteByMenuId(menuId,roleId);
+		//传进来的机构数组为空，循环时候都不进入循环
+		org.json.JSONArray jsonArrayOrg = new org.json.JSONArray(orgdata);
+		for (int j = 0 ; j < jsonArrayOrg.length(); j++){
+			String orgId = jsonArrayOrg.get(j).toString();
 			insertMenuOrg(menuId,roleId,orgId);
 		}
-	}
-
-	//取消授权业务逻辑
-	public void cancleMenuAuth(String menuId,String roleId,String orgId){
-		deleteMenuOrg(menuId,roleId,orgId);
-
 	}
 
 	public void insertMenuOrg(String menuId,String roleId,String orgId){
@@ -36,14 +33,5 @@ public class MenuOrgRoleService{
 		AuMenuOrgDao.dao.save(record);
 
 	}
-	public void deleteMenuOrg(String menuId,String roleId,String orgId){
-		Record record = AuMenuOrgDao.dao.findMenuOrg(menuId,roleId,orgId);
-		if(null != record){
-			record.set("MU_ID",menuId);
-			record.set("RL_ID",roleId);
-			record.set("ORG_ID",orgId);
-			AuMenuOrgDao.dao.delete(record);
-		}
 
-	}
 }
