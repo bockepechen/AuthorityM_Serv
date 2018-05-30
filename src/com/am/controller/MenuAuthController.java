@@ -438,6 +438,62 @@ public class MenuAuthController extends Controller{
 		}
 	}
 
+	//查询机构列表根据菜单和角色编号
+	public void queryOrgByMenuIdRoleId(){
+		//获取请求数据
+		String json = HttpKit.readData(getRequest());
+		/*String json = "{\n" +
+				"\n" +
+				"\t\"jyau_content\": {\n" +
+				"\t\t\" jyau_reqData\": [{\n" +
+				"\t\t\t\"req_no\": \"CL048201802051125231351\",\n" +
+				"\t\t\t\"menu_id\": \"MU201805291413135112\",\n" +
+				"\t\t\t\"role_id\": \"RL201805230932410066\"\n" +
+				"\t\t}],\n" +
+				"\t\t\"jyau_pubData\": {\n" +
+				"\n" +
+				"\t\t\t\"operator_id\": \"1\",\n" +
+				"\t\t\t\"account_id\": \"systemman\",\n" +
+				"\t\t\t\"ip_address\": \"10.2.0.116\",\n" +
+				"\t\t\t\"system_id\": \"10909\"\n" +
+				"\t\t}\n" +
+				"\t}\n" +
+				"}";*/
+		//解析Json
+		Map map = new HashMap();
+		try{
+			map = JsonUtil.analyzejson(json);
+			reqNo = map.get("req_no").toString();
+			operatorId = map.get("operator_id").toString();
+			accountId = map.get("account_id").toString();
+			menuId = map.get("menu_id").toString();
+			roleId = map.get("role_id").toString();
+			if(EmptyUtils.isEmpty(reqNo) || EmptyUtils.isEmpty(operatorId) || EmptyUtils.isEmpty(accountId) || EmptyUtils.isEmpty(menuId) || EmptyUtils.isEmpty(roleId)){
+				returnCode = ReturnCodeUtil.returnCode3;
+			}else{
+				orgList = AuMenuOrgDao.dao.findOrgByRole(roleId,menuId);
+				returnCode = ReturnCodeUtil.returnCode;
+			}
+			returnOrgJson();
+		}catch (Exception e){
+			log.error(e.getMessage(),e);
+			returnCode = ReturnCodeUtil.returnCode2;
+			returnOrgJson();
+		}finally {
+			PubModelUtil.apiRecordBean(map,"AU033",json,jb.toString());
+		}
+	}
+
+	public void returnOrgJson(){
+		returnMessage = JsonUtil.getDictName(dictList,returnCode);
+		jyau_menuData.put("req_no",reqNo);
+		jyau_menuData.put("operator_id",operatorId);
+		jyau_menuData.put("org_list",orgList);
+		jsonArray.add(jyau_menuData);
+		jb = JsonUtil.returnJson(jsonArray,returnCode,returnMessage);
+		renderJson(jb);
+	}
+
 	//菜单-角色-机构
 	public void reuturnMenuRole(){
 		returnMessage = JsonUtil.getDictName(dictList,returnCode);
