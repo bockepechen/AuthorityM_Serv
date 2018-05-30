@@ -37,6 +37,7 @@ public class MenuAuthController extends Controller{
 	String menuId = "";//菜单编号
 	String roleId = "";//角色编号
 	String orgId = "";//机构编号
+	String orgdata = ""; // 操作数据（机构）
 	List<MenuBean> resultList=new ArrayList<>();//多级菜单列表
 	List<Record> roleList = null;//菜单对应的角色列表
 	List<Record> orgList = null;//角色对应的机构列表
@@ -366,6 +367,23 @@ public class MenuAuthController extends Controller{
 				"\t\t}\n" +
 				"\t}\n" +
 				"}";*/
+/*				String json = "{\n" +
+						"\t\"jyau_content\": {\n" +
+						"\t\t\"jyau_reqData\": [{\n" +
+						"\t\t\t\"req_no\": \"CL048201802051125231351\",\n" +
+						"\t\t\t\"menu_id\": \"MU201805231107261367\",\n" +
+						"\t\t\t\"role_id\": \"1\",\n" +
+						*//*"\t\t\t\"org_ids\": [\"OG201805171438586409\", \"OG201805171726129979\"]\n" +*//*
+						"\t\t\t\"org_ids\": []\n" +
+						"\t\t}],\n" +
+						"\t\t\"jyau_pubData\": {\n" +
+						"\t\t\t\"operator_id\": \"1\",\n" +
+						"\t\t\t\"account_id\": \"systemman\",\n" +
+						"\t\t\t\"ip_address\": \"10.2.0.116\",\n" +
+						"\t\t\t\"system_id\": \"10909\"\n" +
+						"\t\t}\n" +
+						"\t}\n" +
+						"}";*/
 		//解析Json
 		Map map = new HashMap();
 		try{
@@ -374,21 +392,33 @@ public class MenuAuthController extends Controller{
 			operatorId = map.get("operator_id").toString();
 			accountId = map.get("account_id").toString();
 			menuId = map.get("menu_id").toString();
-			// roleId = map.get("role_id").toString();
+			roleId = map.get("role_id").toString();
 			// orgId = map.get("org_id").toString();
-			String roleData = map.get("role_data").toString();
-			if(EmptyUtils.isEmpty(reqNo) || EmptyUtils.isEmpty(operatorId) || EmptyUtils.isEmpty(accountId) || EmptyUtils.isEmpty(roleData)
+			orgdata = map.get("org_ids").toString();
+			//String roleData = map.get("role_data").toString();
+			if(EmptyUtils.isEmpty(reqNo) || EmptyUtils.isEmpty(operatorId) || EmptyUtils.isEmpty(accountId) || EmptyUtils.isEmpty(roleId)
 					||EmptyUtils.isEmpty(menuId)){
 				returnCode = ReturnCodeUtil.returnCode3;
 			}else{
-				org.json.JSONArray jsonArrayRole = new org.json.JSONArray(roleData);
+				//org.json.JSONArray jsonArrayRole = new org.json.JSONArray(roleData);
 				boolean suc = Db.tx(new IAtom() {
 					@Override
 					public boolean run() throws SQLException {
 						try {
-							// 删除menuId 对应的配置
-							AuMenuOrgDao.dao.deleteByMenuId(menuId);
-							// 循环插入
+							// 删除menuId,roleId 对应的配置
+							AuMenuOrgDao.dao.deleteByMenuId(menuId,roleId);
+							//传进来的机构数组为空，则无授权机构，不需要操作插入关系表，否则插入，为空，循环时候都不进入循环
+							org.json.JSONArray jsonArrayOrg = new org.json.JSONArray(orgdata);
+							for (int j = 0 ; j < jsonArrayOrg.length(); j++){
+								String orgId = jsonArrayOrg.get(j).toString();
+								Record lationRecord = new Record();
+								lationRecord.set("MO_ID", DatabaseUtil.getEntityPrimaryKey("MO"));
+								lationRecord.set("MU_ID", menuId);
+								lationRecord.set("RL_ID", roleId);
+								lationRecord.set("ORG_ID", orgId);
+								AuMenuOrgDao.dao.save(lationRecord);
+							}
+							/*// 循环插入
 							for (int i = 0; i < jsonArrayRole.length(); i++) {
 								org.json.JSONObject jsonRoleObject = (org.json.JSONObject) jsonArrayRole.get(i);
 								String orgData = jsonRoleObject.optString("rg_data");
@@ -404,7 +434,7 @@ public class MenuAuthController extends Controller{
 									lationRecord.set("ORG_ID", orgId);
 									AuMenuOrgDao.dao.save(lationRecord);
 								}
-							}
+							}*/
 
 						} catch (Exception e) {
 							log.error(e.getMessage(), e);

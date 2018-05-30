@@ -74,13 +74,13 @@ public class AuMenuOrgDao implements IBaseDao{
 	}
 
 	/**
-	 * 根据菜单ID删除菜单-角色-机构删除关系
+	 * 根据菜单ID,角色ID删除菜单-角色-机构删除关系
 	 * @param menuId 菜单ID
 	 * @return
 	 */
-	public int deleteByMenuId(String menuId) {
-		String sql = "DELETE  FROM AU_MENUORG WHERE MU_ID = ?";
-		return Db.use(configName).update(sql,menuId);
+	public int deleteByMenuId(String menuId,String roleId) {
+		String sql = "DELETE  FROM AU_MENUORG WHERE MU_ID = ? AND RL_ID = ?";
+		return Db.use(configName).update(sql,menuId,roleId);
 	}
 
 
