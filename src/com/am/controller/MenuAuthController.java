@@ -338,7 +338,7 @@ public class MenuAuthController extends Controller{
 					public boolean run() throws SQLException {
 						try {
 							//调用业务授权逻辑
-							MenuOrgRoleService.service.menuAuth(menuId,orgId,orgdata);
+							MenuOrgRoleService.service.menuAuth(menuId,roleId,orgdata);
 							/*// 循环插入
 							for (int i = 0; i < jsonArrayRole.length(); i++) {
 								org.json.JSONObject jsonRoleObject = (org.json.JSONObject) jsonArrayRole.get(i);
