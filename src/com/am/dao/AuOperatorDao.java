@@ -73,7 +73,7 @@ public class AuOperatorDao implements IBaseDao{
 	 * @return
 	 */
 	public List<Record> queryOrgByOperatorId(String operatorId){
-		String sql  = "SELECT DISTINCT  o.ORG_ID AS org_id, o.ORG_NAME AS org_name FROM  AU_ORGANIZATION o LEFT JOIN AU_EMPORG eo ON o.ORG_ID = eo.ORG_ID WHERE eo.OP_OPRATORID = ? AND eo.RL_ID IS NOT NULL";
+		String sql  = "SELECT DISTINCT  o.ORG_ID AS org_id, o.ORG_NAME AS org_name FROM  AU_ORGANIZATION o LEFT JOIN AU_EMPORG eo ON o.ORG_ID = eo.ORG_ID WHERE eo.OP_OPRATORID = ?";
 		return Db.use(configName).find(sql,operatorId);
 	}
 
