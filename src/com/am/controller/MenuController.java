@@ -221,13 +221,13 @@ public class MenuController extends Controller{
 				"\t\t\" jyau_reqData\": [{\n" +
 				"\t\t\t\"req_no\": \"AU2018048201802051125231351\",\n" +
 				"\t\t\t\"parent_id\": \"1\",\n" +
-				"\t\t\t\"menu_id\": \"1\",\n" +
-				"\t\t\t\"menu_name\": \"新增子菜单一\",\n" +
+				"\t\t\t\"menu_id\": \"MU5555\",\n" +
+				"\t\t\t\"menu_name\": \"修改菜单LLL\",\n" +
 				"\t\t\t\"menu_code\": \"10101\",\n" +
 				"\t\t\t\"if_leaf\": \"1\",\n" +
 				"\t\t\t\"display_order\": \"1\",\n" +
 				"\t\t\t\"menu_action\": \"1\",\n" +
-				"\t\t\t\"type\": \"01\"\n" +
+				"\t\t\t\"type\": \"02\"\n" +
 				"\t\t}],\n" +
 				"\t\t\"jyau_pubData\": {\n" +
 				"\n" +
@@ -262,7 +262,7 @@ public class MenuController extends Controller{
 							if(type.equals("01")) {//新增菜单--增子菜单,需要传parentId
 								MenuService.service.InsertMenu(menuName, menuCode, ifLeaf, displayOrder, parentId,menuAction);
 							}else{//修改,传menuId
-								MenuService.service.UpdateMenu(menuName, menuCode, ifLeaf, displayOrder, menuId,menuAction);
+								MenuService.service.UpdateMenu(menuName, menuCode, ifLeaf, displayOrder, menuId,parentId,menuAction);
 							}
 						} catch (Exception e) {
 							log.error(e.getMessage(), e);
@@ -287,6 +287,49 @@ public class MenuController extends Controller{
 			}else{
 				PubModelUtil.apiRecordBean(map,"AU02002",json,jb.toString());
 			}
+		}
+	}
+
+	/**
+	 * 查询父级菜单信息
+	 */
+	public void findParentMenu(){
+
+		//获取请求数据
+		String json = HttpKit.readData(getRequest());
+		/*String json = "{\n" +
+				"\t\"jyau_content\": {\n" +
+				"\t\t\" jyau_reqData\": [{\n" +
+				"\t\t\t\"req_no\": \"AU2018048201802051125231351\"\n" +
+				"\t\t}],\n" +
+				"\t\t\"jyau_pubData\": {\n" +
+				"\n" +
+				"\t\t\t\"operator_id\": \"O201801301417012263\",\n" +
+				"\t\t\t\"account_id\": \"systemman\",\n" +
+				"\t\t\t\"ip_address\": \"10.2.0.116\",\n" +
+				"\t\t\t\"system_id\": \"10909\"\n" +
+				"\t\t}\n" +
+				"\t}\n" +
+				"}";*/
+		//解析Json
+		Map map = new HashMap();
+		try{
+			map = JsonUtil.analyzejson(json);
+			reqNo = map.get("req_no").toString();
+			operatorId = map.get("operator_id").toString();
+			if(EmptyUtils.isEmpty(reqNo) || EmptyUtils.isEmpty(operatorId)){
+				returnCode = ReturnCodeUtil.returnCode3;
+			}else {
+				menuList = AuMenuDao.dao.queryParentMenu();
+				returnCode = ReturnCodeUtil.returnCode;
+			}
+			returnJson();
+		}catch (Exception e){
+			log.error(e.getMessage(),e);
+			returnCode = ReturnCodeUtil.returnCode2;
+			returnJson();
+		}finally {
+			PubModelUtil.apiRecordBean(map,"AU034",json,jb.toString());
 		}
 	}
 

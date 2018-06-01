@@ -77,4 +77,12 @@ public class AuMenuDao implements  IBaseDao {
 		return Db.use(configName).findFirst(sql,parentId);
 	}
 
+	/**
+	 * 查询一级菜单(父菜单为空即为一级菜单)
+	 */
+	public List<Record> queryParentMenu() {
+		String sql = "SELECT MU_ID AS menu_id ,MU_NAME as menu_name, MU_ACTION AS menu_action FROM AU_MENU WHERE MU_PARENTID IS NULL";
+		return Db.use(configName).find(sql);
+	}
+
 }

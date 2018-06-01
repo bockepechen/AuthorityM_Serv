@@ -47,15 +47,16 @@ public class MenuService {
 		AuMenuDao.dao.save(record);
 	}
 	/**
-	 * 修改菜单--父级菜单
+	 * 修改菜单
 	 */
-	public void UpdateMenu(String menuName,String menuCode,String ifLeaf,String displayOrder,String menuId,String menuAction){
+	public void UpdateMenu(String menuName,String menuCode,String ifLeaf,String displayOrder,String menuId,String parentId,String menuAction){
 		Record record = new Record();
 		record.set("MU_ID", menuId);
 		record.set("MU_NAME",menuName);
 		record.set("MU_CODE",menuCode);
 		record.set("MU_IFLEAF",ifLeaf);
 		record.set("MU_DISPLAYORDER",displayOrder);
+		record.set("MU_PARENTID",parentId);
 		record.set("MU_ACTION",menuAction);
 		AuMenuDao.dao.update(record);
 	}
