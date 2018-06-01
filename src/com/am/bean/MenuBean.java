@@ -12,7 +12,16 @@ public class MenuBean{
 
 	public String parent_id;
 	public String action;
+	public int display_order;
 	public List<MenuBean> child_list;
+
+	public int getDisplay_order() {
+		return display_order;
+	}
+
+	public void setDisplay_order(int display_order) {
+		this.display_order = display_order;
+	}
 
 	public String getAction() {
 		return action;

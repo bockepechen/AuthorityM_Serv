@@ -31,7 +31,7 @@ public class AuMenuDao implements  IBaseDao {
 
 	@Override
 	public List<Record> findAll() {
-		String sql = "SELECT am.MU_ID AS mu_id,am.MU_NAME AS mu_name, ad.DICTNAME AS if_leaf FROM AU_MENU AS am, AU_DICT_ENTRY AS ad WHERE DICTTYPEID = 'dict_if'AND DICTID = am.MU_IFLEAF";
+		String sql = "SELECT am.MU_ID AS mu_id,am.MU_NAME AS mu_name, ad.DICTNAME AS if_leaf FROM AU_MENU AS am, AU_DICT_ENTRY AS ad WHERE DICTTYPEID = 'dict_if'AND DICTID = am.MU_IFLEAF ORDER BY am.MU_DISPLAYORDER";
 		return Db.use(configName).find(sql);
 	}
 
@@ -65,7 +65,7 @@ public class AuMenuDao implements  IBaseDao {
 	 * 查询菜单(父菜单为空即为一级菜单)
 	 */
 	public List<Record> queryMenu() {
-		String sql = "SELECT MU_ID AS menu_id ,MU_NAME as menu_name, MU_ACTION AS menu_action,MU_PARENTID AS parent_id FROM AU_MENU";
+		String sql = "SELECT MU_ID AS menu_id ,MU_NAME as menu_name, MU_ACTION AS menu_action,MU_PARENTID AS parent_id,MU_DISPLAYORDER AS menu_order FROM AU_MENU ORDER BY MU_DISPLAYORDER";
 		return Db.use(configName).find(sql);
 	}
 
@@ -81,7 +81,7 @@ public class AuMenuDao implements  IBaseDao {
 	 * 查询一级菜单(父菜单为空即为一级菜单)
 	 */
 	public List<Record> queryParentMenu() {
-		String sql = "SELECT MU_ID AS menu_id ,MU_NAME as menu_name, MU_ACTION AS menu_action FROM AU_MENU WHERE MU_PARENTID IS NULL";
+		String sql = "SELECT MU_ID AS menu_id ,MU_NAME as menu_name, MU_ACTION AS menu_action FROM AU_MENU WHERE MU_PARENTID IS NULL ORDER BY MU_DISPLAYORDER";
 		return Db.use(configName).find(sql);
 	}
 

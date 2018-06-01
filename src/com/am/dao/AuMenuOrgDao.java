@@ -69,7 +69,7 @@ public class AuMenuOrgDao implements IBaseDao{
 	 * @return
 	 */
 	public List<Record> authMenu(String operatorId,String orgId){
-		String sql = "SELECT  am.MU_ID AS menu_id,am.MU_NAME AS menu_name ,am.MU_ACTION AS menu_action,am.MU_PARENTID AS parent_id  FROM AU_MENUORG  amo LEFT JOIN AU_MENU am ON  am.MU_ID = amo.MU_ID WHERE amo.ORG_ID = ? AND amo.RL_ID IN(SELECT RL_ID FROM AU_EMPORG WHERE OP_OPRATORID  = ? AND ORG_ID = ? AND RL_ID IS NOT NULL )";
+		String sql = "SELECT  am.MU_ID AS menu_id,am.MU_NAME AS menu_name ,am.MU_ACTION AS menu_action,am.MU_PARENTID AS parent_id  ,am.MU_DISPLAYORDER AS menu_order FROM AU_MENUORG  amo , AU_MENU am WHERE   am.MU_ID = amo.MU_ID AND amo.ORG_ID = ? AND amo.RL_ID IN(SELECT RL_ID FROM AU_EMPORG WHERE OP_OPRATORID  = ? AND ORG_ID = ? AND RL_ID IS NOT NULL ) ORDER BY am.MU_DISPLAYORDER";
 		return Db.use(configName).find(sql,orgId,operatorId,orgId);
 	}
 

@@ -18,16 +18,13 @@ import com.jfinal.plugin.activerecord.Record;
 import com.jfinal.plugin.ehcache.CacheKit;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 /**
  * Created by ZHAO on 2018/5/22.
  */
-public class MenuAuthController extends Controller{
+public class MenuAuthController extends Controller {
 	static Log log = Log.getLog(MenuAuthController.class);
 
 	String operatorId = "";//用户编号
@@ -37,15 +34,15 @@ public class MenuAuthController extends Controller{
 	String roleId = "";//角色编号
 	String orgId = "";//机构编号
 	String orgdata = ""; // 操作数据（机构）
-	List<MenuBean> resultList=new ArrayList<>();//多级菜单列表
+	List<MenuBean> resultList = new ArrayList<>();//多级菜单列表
 	List<Record> roleList = null;//菜单对应的角色列表
 	List<Record> orgList = null;//角色对应的机构列表
 	List<Record> menuByRoleList = null;//角色对应的菜单列表
-	JSONArray  menuList =  new JSONArray();//可操作菜单列表
+	JSONArray menuList = new JSONArray();//可操作菜单列表
 	String returnCode = "";//返回码
 	String returnMessage = "";//返回信息
-	JSONArray dictList = CacheKit.get("dataCache","s_dict_returncode");
-	JSONArray actionList = CacheKit.get("dataCache","s_dict_sysparams");
+	JSONArray dictList = CacheKit.get("dataCache", "s_dict_returncode");
+	JSONArray actionList = CacheKit.get("dataCache", "s_dict_sysparams");
 	JSONObject jb = new JSONObject();
 	JSONArray jsonArray = new JSONArray();
 	JSONObject jyau_menuData = new JSONObject();
@@ -54,8 +51,9 @@ public class MenuAuthController extends Controller{
 
 	JSONArray menuOrgArray = new JSONArray(); // 返回拥有菜单的机构listJson
 	JSONArray userRoleArray = new JSONArray(); // 返回拥有角色的用户listJson
+
 	//显示菜单层次列表
-	public void index(){
+	public void index() {
 		//获取请求数据
 		String json = HttpKit.readData(getRequest());
 		/*String json = "{\n" +
@@ -75,31 +73,31 @@ public class MenuAuthController extends Controller{
 				"}";*/
 		//解析Json
 		Map map = new HashMap();
-		try{
+		try {
 			map = JsonUtil.analyzejson(json);
 			reqNo = map.get("req_no").toString();
 			operatorId = map.get("operator_id").toString();
 			accountId = map.get("account_id").toString();
-			if(EmptyUtils.isEmpty(reqNo) || EmptyUtils.isEmpty(operatorId) || EmptyUtils.isEmpty(accountId)){
+			if (EmptyUtils.isEmpty(reqNo) || EmptyUtils.isEmpty(operatorId) || EmptyUtils.isEmpty(accountId)) {
 				returnCode = ReturnCodeUtil.returnCode3;
-			}else{
+			} else {
 				List<Record> menuList = AuMenuDao.dao.queryMenu();
 				multiLevelMenu(menuList);
 				returnCode = ReturnCodeUtil.returnCode;
 			}
 			returnMenuJson();
-		}catch (Exception e){
-			log.error(e.getMessage(),e);
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
 			returnCode = ReturnCodeUtil.returnCode2;
 			returnMenuJson();
-		}finally {
-			PubModelUtil.apiRecordBean(map,"AU025",json,jb.toString());
+		} finally {
+			PubModelUtil.apiRecordBean(map, "AU025", json, jb.toString());
 		}
 	}
 
 
 	//查询菜单对应的角色及机构
-	public void queryRoleByMenu(){
+	public void queryRoleByMenu() {
 		//获取请求数据
 		String json = HttpKit.readData(getRequest());
 		/*String json = "{\n" +
@@ -120,32 +118,31 @@ public class MenuAuthController extends Controller{
 				"}";*/
 		//解析Json
 		Map map = new HashMap();
-		try{
+		try {
 			map = JsonUtil.analyzejson(json);
 			reqNo = map.get("req_no").toString();
 			operatorId = map.get("operator_id").toString();
 			accountId = map.get("account_id").toString();
 			menuId = map.get("menu_id").toString();
-			if(EmptyUtils.isEmpty(reqNo) || EmptyUtils.isEmpty(operatorId) || EmptyUtils.isEmpty(accountId) || EmptyUtils.isEmpty(menuId)){
+			if (EmptyUtils.isEmpty(reqNo) || EmptyUtils.isEmpty(operatorId) || EmptyUtils.isEmpty(accountId) || EmptyUtils.isEmpty(menuId)) {
 				returnCode = ReturnCodeUtil.returnCode3;
-			}else{
+			} else {
 				getDetailInfo(menuId);
 				returnCode = ReturnCodeUtil.returnCode;
 			}
 			reuturnMenuRole();
-		}catch (Exception e){
-			log.error(e.getMessage(),e);
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
 			returnCode = ReturnCodeUtil.returnCode2;
 			reuturnMenuRole();
-		}finally {
-			PubModelUtil.apiRecordBean(map,"AU026",json,jb.toString());
+		} finally {
+			PubModelUtil.apiRecordBean(map, "AU026", json, jb.toString());
 		}
 	}
 
 
-
 	//查询角色对应的菜单及机构
-	public void queryMenuOrgByRole(){
+	public void queryMenuOrgByRole() {
 		//获取请求数据
 		String json = HttpKit.readData(getRequest());
 		/*String json = "{\n" +
@@ -166,30 +163,30 @@ public class MenuAuthController extends Controller{
 				"}";*/
 		//解析Json
 		Map map = new HashMap();
-		try{
+		try {
 			map = JsonUtil.analyzejson(json);
 			reqNo = map.get("req_no").toString();
 			operatorId = map.get("operator_id").toString();
 			accountId = map.get("account_id").toString();
 			roleId = map.get("role_id").toString();
-			if(EmptyUtils.isEmpty(reqNo) || EmptyUtils.isEmpty(operatorId) || EmptyUtils.isEmpty(accountId) || EmptyUtils.isEmpty(roleId)){
+			if (EmptyUtils.isEmpty(reqNo) || EmptyUtils.isEmpty(operatorId) || EmptyUtils.isEmpty(accountId) || EmptyUtils.isEmpty(roleId)) {
 				returnCode = ReturnCodeUtil.returnCode3;
-			}else{
+			} else {
 				getDetailInfoByRole(roleId);
 				returnCode = ReturnCodeUtil.returnCode;
 			}
 			reuturnRoleMenu();
-		}catch (Exception e){
-			log.error(e.getMessage(),e);
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
 			returnCode = ReturnCodeUtil.returnCode2;
 			reuturnRoleMenu();
-		}finally {
-			PubModelUtil.apiRecordBean(map,"AU032",json,jb.toString());
+		} finally {
+			PubModelUtil.apiRecordBean(map, "AU032", json, jb.toString());
 		}
 	}
 
 	//菜单-角色-机构授权
-	public void operatorMenuAuth(){
+	public void operatorMenuAuth() {
 		//获取请求数据
 		String json = HttpKit.readData(getRequest());
 		/*String json = "{\n" +
@@ -319,7 +316,7 @@ public class MenuAuthController extends Controller{
 						"}";*/
 		//解析Json
 		Map map = new HashMap();
-		try{
+		try {
 			map = JsonUtil.analyzejson(json);
 			reqNo = map.get("req_no").toString();
 			operatorId = map.get("operator_id").toString();
@@ -329,17 +326,17 @@ public class MenuAuthController extends Controller{
 			// orgId = map.get("org_id").toString();
 			orgdata = map.get("org_ids").toString();
 			//String roleData = map.get("role_data").toString();
-			if(EmptyUtils.isEmpty(reqNo) || EmptyUtils.isEmpty(operatorId) || EmptyUtils.isEmpty(accountId) || EmptyUtils.isEmpty(roleId)
-					||EmptyUtils.isEmpty(menuId)){
+			if (EmptyUtils.isEmpty(reqNo) || EmptyUtils.isEmpty(operatorId) || EmptyUtils.isEmpty(accountId) || EmptyUtils.isEmpty(roleId)
+					|| EmptyUtils.isEmpty(menuId)) {
 				returnCode = ReturnCodeUtil.returnCode3;
-			}else{
+			} else {
 				//org.json.JSONArray jsonArrayRole = new org.json.JSONArray(roleData);
 				boolean suc = Db.tx(new IAtom() {
 					@Override
 					public boolean run() throws SQLException {
 						try {
 							//调用业务授权逻辑
-							MenuOrgRoleService.service.menuAuth(menuId,roleId,orgdata);
+							MenuOrgRoleService.service.menuAuth(menuId, roleId, orgdata);
 							/*// 循环插入
 							for (int i = 0; i < jsonArrayRole.length(); i++) {
 								org.json.JSONObject jsonRoleObject = (org.json.JSONObject) jsonArrayRole.get(i);
@@ -373,18 +370,18 @@ public class MenuAuthController extends Controller{
 			}
 
 			returnJson();
-		}catch (Exception e){
-			log.error(e.getMessage(),e);
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
 			returnCode = ReturnCodeUtil.returnCode2;
 			returnJson();
-		}finally {
-			PubModelUtil.apiRecordBean(map,"AU028",json,jb.toString());
+		} finally {
+			PubModelUtil.apiRecordBean(map, "AU028", json, jb.toString());
 		}
 	}
 
 
 	//查询可操作的菜单
-	public void queryOperatorMenu(){
+	public void queryOperatorMenu() {
 		//获取请求数据
 		String json = HttpKit.readData(getRequest());
 		/*String json = "{\n" +
@@ -405,21 +402,21 @@ public class MenuAuthController extends Controller{
 				"}";*/
 		//解析Json
 		Map map = new HashMap();
-		try{
+		try {
 			map = JsonUtil.analyzejson(json);
 			reqNo = map.get("req_no").toString();
 			operatorId = map.get("operator_id").toString();
 			accountId = map.get("account_id").toString();
 			orgId = map.get("org_id").toString();
-			if(EmptyUtils.isEmpty(reqNo) || EmptyUtils.isEmpty(operatorId) || EmptyUtils.isEmpty(accountId) || EmptyUtils.isEmpty(orgId)){
+			if (EmptyUtils.isEmpty(reqNo) || EmptyUtils.isEmpty(operatorId) || EmptyUtils.isEmpty(accountId) || EmptyUtils.isEmpty(orgId)) {
 				returnCode = ReturnCodeUtil.returnCode3;
-			}else{
+			} else {
 				List<Record> allRecords = AuMenuDao.dao.queryMenu();
 				Map<String, Record> allRecordMap = new HashMap<String, Record>();
 				for (Record record : allRecords) {
 					allRecordMap.put(record.getStr("menu_id"), record);
 				}
-				List<Record> muList = AuMenuOrgDao.dao.authMenu(operatorId,orgId);//子菜单（过滤出来的节点）
+				List<Record> muList = AuMenuOrgDao.dao.authMenu(operatorId, orgId);//子菜单（过滤出来的节点）
 				//符合条件的所有菜单（通过子菜单筛选出来其父级菜单，父父级菜单...）
 				List<Record> filterList = getSelfAndTheirParentRecord(muList, new ArrayList<Record>(),
 						new HashMap<String, Record>(), allRecordMap);
@@ -427,17 +424,17 @@ public class MenuAuthController extends Controller{
 				returnCode = ReturnCodeUtil.returnCode;
 			}
 			returnMenuJson();
-		}catch (Exception e){
-			log.error(e.getMessage(),e);
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
 			returnCode = ReturnCodeUtil.returnCode2;
 			returnMenuJson();
-		}finally {
-			PubModelUtil.apiRecordBean(map,"AU030",json,jb.toString());
+		} finally {
+			PubModelUtil.apiRecordBean(map, "AU030", json, jb.toString());
 		}
 	}
 
 	//查询机构列表根据菜单和角色编号
-	public void queryOrgByMenuIdRoleId(){
+	public void queryOrgByMenuIdRoleId() {
 		//获取请求数据
 		String json = HttpKit.readData(getRequest());
 		/*String json = "{\n" +
@@ -459,124 +456,125 @@ public class MenuAuthController extends Controller{
 				"}";*/
 		//解析Json
 		Map map = new HashMap();
-		try{
+		try {
 			map = JsonUtil.analyzejson(json);
 			reqNo = map.get("req_no").toString();
 			operatorId = map.get("operator_id").toString();
 			accountId = map.get("account_id").toString();
 			menuId = map.get("menu_id").toString();
 			roleId = map.get("role_id").toString();
-			if(EmptyUtils.isEmpty(reqNo) || EmptyUtils.isEmpty(operatorId) || EmptyUtils.isEmpty(accountId) || EmptyUtils.isEmpty(menuId) || EmptyUtils.isEmpty(roleId)){
+			if (EmptyUtils.isEmpty(reqNo) || EmptyUtils.isEmpty(operatorId) || EmptyUtils.isEmpty(accountId) || EmptyUtils.isEmpty(menuId) || EmptyUtils.isEmpty(roleId)) {
 				returnCode = ReturnCodeUtil.returnCode3;
-			}else{
-				orgList = AuMenuOrgDao.dao.findOrgByRole(roleId,menuId);
+			} else {
+				orgList = AuMenuOrgDao.dao.findOrgByRole(roleId, menuId);
 				returnCode = ReturnCodeUtil.returnCode;
 			}
 			returnOrgJson();
-		}catch (Exception e){
-			log.error(e.getMessage(),e);
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
 			returnCode = ReturnCodeUtil.returnCode2;
 			returnOrgJson();
-		}finally {
-			PubModelUtil.apiRecordBean(map,"AU033",json,jb.toString());
+		} finally {
+			PubModelUtil.apiRecordBean(map, "AU033", json, jb.toString());
 		}
 	}
 
-	public void returnOrgJson(){
-		returnMessage = JsonUtil.getDictName(dictList,returnCode);
-		jyau_menuData.put("req_no",reqNo);
-		jyau_menuData.put("operator_id",operatorId);
-		jyau_menuData.put("org_list",orgList);
+	public void returnOrgJson() {
+		returnMessage = JsonUtil.getDictName(dictList, returnCode);
+		jyau_menuData.put("req_no", reqNo);
+		jyau_menuData.put("operator_id", operatorId);
+		jyau_menuData.put("org_list", orgList);
 		jsonArray.add(jyau_menuData);
-		jb = JsonUtil.returnJson(jsonArray,returnCode,returnMessage);
+		jb = JsonUtil.returnJson(jsonArray, returnCode, returnMessage);
 		renderJson(jb);
 	}
 
 	//菜单-角色-机构
-	public void reuturnMenuRole(){
-		returnMessage = JsonUtil.getDictName(dictList,returnCode);
-		jyau_menuData.put("req_no",reqNo);
-		jyau_menuData.put("operator_id",operatorId);
-		jyau_menuData.put("role_data",allRole);
-		jyau_menuData.put("org_data",allOrg);
-		jyau_menuData.put("roleOrg_data",userRoleArray);
+	public void reuturnMenuRole() {
+		returnMessage = JsonUtil.getDictName(dictList, returnCode);
+		jyau_menuData.put("req_no", reqNo);
+		jyau_menuData.put("operator_id", operatorId);
+		jyau_menuData.put("role_data", allRole);
+		jyau_menuData.put("org_data", allOrg);
+		jyau_menuData.put("roleOrg_data", userRoleArray);
 		jsonArray.add(jyau_menuData);
-		jb = JsonUtil.returnJson(jsonArray,returnCode,returnMessage);
+		jb = JsonUtil.returnJson(jsonArray, returnCode, returnMessage);
 		renderJson(jb);
 	}
 
 	//角色-菜单-机构
-	public void reuturnRoleMenu(){
-		returnMessage = JsonUtil.getDictName(dictList,returnCode);
-		jyau_menuData.put("req_no",reqNo);
-		jyau_menuData.put("operator_id",operatorId);
-		jyau_menuData.put("menu_data",resultList);
-		jyau_menuData.put("org_data",allOrg);
-		jyau_menuData.put("menuOrg_data",menuOrgArray);
+	public void reuturnRoleMenu() {
+		returnMessage = JsonUtil.getDictName(dictList, returnCode);
+		jyau_menuData.put("req_no", reqNo);
+		jyau_menuData.put("operator_id", operatorId);
+		jyau_menuData.put("menu_data", resultList);
+		jyau_menuData.put("org_data", allOrg);
+		jyau_menuData.put("menuOrg_data", menuOrgArray);
 		jsonArray.add(jyau_menuData);
-		jb = JsonUtil.returnJson(jsonArray,returnCode,returnMessage);
+		jb = JsonUtil.returnJson(jsonArray, returnCode, returnMessage);
 		renderJson(jb);
 	}
 
-	public void returnJson(){
-		returnMessage = JsonUtil.getDictName(dictList,returnCode);
-		jyau_menuData.put("req_no",reqNo);
-		jyau_menuData.put("operator_id",operatorId);
+	public void returnJson() {
+		returnMessage = JsonUtil.getDictName(dictList, returnCode);
+		jyau_menuData.put("req_no", reqNo);
+		jyau_menuData.put("operator_id", operatorId);
 		jsonArray.add(jyau_menuData);
-		jb = JsonUtil.returnJson(jsonArray,returnCode,returnMessage);
+		jb = JsonUtil.returnJson(jsonArray, returnCode, returnMessage);
 		renderJson(jb);
 	}
 
-	public void returnMenuJson(){
-		returnMessage = JsonUtil.getDictName(dictList,returnCode);
-		jyau_menuData.put("req_no",reqNo);
-		jyau_menuData.put("operator_id",operatorId);
-		jyau_menuData.put("multi_menuList",resultList);
+	public void returnMenuJson() {
+		returnMessage = JsonUtil.getDictName(dictList, returnCode);
+		jyau_menuData.put("req_no", reqNo);
+		jyau_menuData.put("operator_id", operatorId);
+		jyau_menuData.put("multi_menuList", resultList);
 		jsonArray.add(jyau_menuData);
-		jb = JsonUtil.returnJson(jsonArray,returnCode,returnMessage);
+		jb = JsonUtil.returnJson(jsonArray, returnCode, returnMessage);
 		renderJson(jb);
 	}
 
 	// 根据菜单ID查询对应的角色机构
-	private void  getDetailInfo(String menuId){
+	private void getDetailInfo(String menuId) {
 		allOrg = AuOrganizationDao.dao.findAll();
 		allRole = AuRoleDao.dao.findAllRole();
 		roleList = AuMenuOrgDao.dao.findRoleByMenu(menuId);
-		for (Record role : roleList){
+		for (Record role : roleList) {
 			String roleId = role.getStr("role_id");
 			String roleName = role.getStr("role_name");
 			JSONObject roleJsonObject = new JSONObject();
 			roleJsonObject.put("role_id", roleId);
 			roleJsonObject.put("role_Name", roleName);
-			JSONArray ja = queryOrgList(menuId,roleId);
-			roleJsonObject.put("rg_data",ja);
+			JSONArray ja = queryOrgList(menuId, roleId);
+			roleJsonObject.put("rg_data", ja);
 			userRoleArray.add(roleJsonObject);
 		}
 	}
 
 	// 根据角色ID查询对应的菜单机构
-	private void  getDetailInfoByRole(String roleId){
+	private void getDetailInfoByRole(String roleId) {
 		allOrg = AuOrganizationDao.dao.findAll();//所有机构
 		List<Record> menuList = AuMenuDao.dao.queryMenu();
 		multiLevelMenu(menuList);//所有菜单列表，封装在resultList
 		menuByRoleList = AuMenuOrgDao.dao.findMenuByRole(roleId);
-		for (Record menu : menuByRoleList){
+		for (Record menu : menuByRoleList) {
 			String menuId = menu.getStr("menu_id");
 			String menuName = menu.getStr("menu_name");
 			JSONObject menuJsonObject = new JSONObject();
 			menuJsonObject.put("menu_id", menuId);
 			menuJsonObject.put("menu_name", menuName);
-			JSONArray ja = queryOrgList(menuId,roleId);
-			menuJsonObject.put("mg_data",ja);
+			JSONArray ja = queryOrgList(menuId, roleId);
+			menuJsonObject.put("mg_data", ja);
 			menuOrgArray.add(menuJsonObject);
 		}
 	}
+
 	//角色菜单对应的机构列表
-	public JSONArray  queryOrgList(String menuId,String roleId){
+	public JSONArray queryOrgList(String menuId, String roleId) {
 		List<Record> orgList = null; // 菜单或者角色对应的orgList
-		orgList = AuMenuOrgDao.dao.findOrgByRole(roleId,menuId);
+		orgList = AuMenuOrgDao.dao.findOrgByRole(roleId, menuId);
 		JSONArray orgArray = new JSONArray(); // 返回角色或者菜单拥有的机构listJson
-		for (Record org : orgList){
+		for (Record org : orgList) {
 			JSONObject orgJsonObject = new JSONObject();
 			orgJsonObject.put("org_id", org.getStr("org_id"));
 			orgJsonObject.put("org_name", org.getStr("org_name"));
@@ -584,45 +582,48 @@ public class MenuAuthController extends Controller{
 		}
 		return orgArray;
 	}
+
 	//多级菜单的查询
-	public void multiLevelMenu(List<Record> menuList ){
+	public void multiLevelMenu(List<Record> menuList) {
 		List<MenuBean> mbList = new ArrayList<>();
-		for(int i=0;i<menuList.size();i++){
+		for (int i = 0; i < menuList.size(); i++) {
 			String menuAction = "";
 			String mAction = menuList.get(i).getStr("menu_action");
-			if(EmptyUtils.isNotEmpty(mAction)){
-				String preFix = JsonUtil.getDictName(actionList,"url");
+			if (EmptyUtils.isNotEmpty(mAction)) {
+				String preFix = JsonUtil.getDictName(actionList, "url");
 				menuAction = preFix + mAction;
 			}
 			MenuBean mb = new MenuBean();
 			mb.setMenu_id(menuList.get(i).getStr("menu_id"));
 			mb.setName(menuList.get(i).getStr("menu_name"));
 			mb.setAction(menuAction);
+			mb.setDisplay_order(menuList.get(i).getInt("menu_order"));
 			mb.setParent_id(menuList.get(i).getStr("parent_id"));
 			mbList.add(mb);
 		}
+		getSortChildren(mbList);
 		//获取顶层元素集合
 		for (MenuBean entity : mbList) {
-			String parentId=entity.getParent_id();
+			String parentId = entity.getParent_id();
 			//if(parentId==null||topId.equals(parentId)){
-			if(parentId==null){
+			if (parentId == null) {
 				resultList.add(entity);
 			}
 		}
 		//获取每个顶层元素的子数据集合
 		for (MenuBean entity : resultList) {
-			entity.setChild_list(getChild(entity.getMenu_id(),mbList));
+			entity.setChild_list(getChild(entity.getMenu_id(), mbList));
 		}
 	}
 
 	//查询子菜单
 	private List<MenuBean> getChild(String id, List<MenuBean> rootMenu) {
-		List<MenuBean> childList=new ArrayList<>();
+		List<MenuBean> childList = new ArrayList<>();
 		String parentId;
 		//子集的直接子对象
 		for (MenuBean entity : rootMenu) {
-			parentId=entity.getParent_id();
-			if(id.equals(parentId)){
+			parentId = entity.getParent_id();
+			if (id.equals(parentId)) {
 				childList.add(entity);
 			}
 		}
@@ -631,7 +632,7 @@ public class MenuAuthController extends Controller{
 			entity.setChild_list(getChild(entity.getMenu_id(), rootMenu));
 		}
 		//递归退出条件
-		if(childList.size()==0){
+		if (childList.size() == 0) {
 			return null;
 		}
 		return childList;
@@ -640,10 +641,10 @@ public class MenuAuthController extends Controller{
 	/**
 	 * 说明方法描述：递归找出本节点和他们的父节点
 	 *
-	 * @param parentList 根据关键字过滤出来的相关节点的父节点
-	 * @param resultList 返回的过滤出来的节点
+	 * @param parentList      根据关键字过滤出来的相关节点的父节点
+	 * @param resultList      返回的过滤出来的节点
 	 * @param filterRecordMap 已经过滤出来的节点
-	 * @param allRecordMap 所有节点
+	 * @param allRecordMap    所有节点
 	 * @return
 	 */
 	private List<Record> getSelfAndTheirParentRecord(List<Record> parentList, List<Record> resultList,
@@ -683,5 +684,23 @@ public class MenuAuthController extends Controller{
 
 		return resultList;
 	}
+	//获取排序
+	private List<MenuBean> getSortChildren(List<MenuBean> children) {
+		MyCompare my = new MyCompare();
+		Collections.sort(children, my);
+		return children;
+	}
+
+	public class MyCompare implements Comparator<MenuBean> {
+		@Override
+		public int compare(MenuBean o1, MenuBean o2) {
+			if(o1.getDisplay_order()<o2.getDisplay_order()){
+				return -1;
+			}else{
+				return 1;
+			}
+		}
+	}
 
 }
+
