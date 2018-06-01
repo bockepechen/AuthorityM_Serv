@@ -83,7 +83,8 @@ public class MenuAuthController extends Controller{
 			if(EmptyUtils.isEmpty(reqNo) || EmptyUtils.isEmpty(operatorId) || EmptyUtils.isEmpty(accountId)){
 				returnCode = ReturnCodeUtil.returnCode3;
 			}else{
-				multiLevelMenu();
+				List<Record> menuList = AuMenuDao.dao.queryMenu();
+				multiLevelMenu(menuList);
 				returnCode = ReturnCodeUtil.returnCode;
 			}
 			returnMenuJson();
@@ -391,11 +392,11 @@ public class MenuAuthController extends Controller{
 				"\t\"jyau_content\": {\n" +
 				"\t\t\" jyau_reqData\": [{\n" +
 				"\t\t\t\"req_no\": \"AU048201802051125231351\",\n" +
-				"\t\t\t\"org_id\": \"OG201805171726129979\"\n" +
+				"\t\t\t\"org_id\": \"OG201805171438586409\"\n" +
 				"\t\t}],\n" +
 				"\t\t\"jyau_pubData\": {\n" +
 				"\n" +
-				"\t\t\t\"operator_id\": \"1\",\n" +
+				"\t\t\t\"operator_id\": \"OP201805221014363863\",\n" +
 				"\t\t\t\"account_id\": \"systemman\",\n" +
 				"\t\t\t\"ip_address\": \"10.2.0.116\",\n" +
 				"\t\t\t\"system_id\": \"10909\"\n" +
@@ -413,26 +414,23 @@ public class MenuAuthController extends Controller{
 			if(EmptyUtils.isEmpty(reqNo) || EmptyUtils.isEmpty(operatorId) || EmptyUtils.isEmpty(accountId) || EmptyUtils.isEmpty(orgId)){
 				returnCode = ReturnCodeUtil.returnCode3;
 			}else{
-				List<Record> muList = AuMenuOrgDao.dao.authMenu(operatorId,orgId);
-				for(Record  record :muList){
-					String menuAction = "";
-					String mAction = record.getStr("MU_ACTION");
-					if(EmptyUtils.isNotEmpty(mAction)){
-						String preFix = JsonUtil.getDictName(actionList,"url");
-						menuAction = preFix + mAction;
-					}
-					JSONObject jo = new JSONObject();
-					jo.put("menu_action",menuAction);
-					jo.put("menu_name",record.getStr("MU_NAME"));
-					menuList.add(jo);
+				List<Record> allRecords = AuMenuDao.dao.queryMenu();
+				Map<String, Record> allRecordMap = new HashMap<String, Record>();
+				for (Record record : allRecords) {
+					allRecordMap.put(record.getStr("menu_id"), record);
 				}
+				List<Record> muList = AuMenuOrgDao.dao.authMenu(operatorId,orgId);//子菜单（过滤出来的节点）
+				//符合条件的所有菜单（通过子菜单筛选出来其父级菜单，父父级菜单...）
+				List<Record> filterList = getSelfAndTheirParentRecord(muList, new ArrayList<Record>(),
+						new HashMap<String, Record>(), allRecordMap);
+				multiLevelMenu(filterList);
 				returnCode = ReturnCodeUtil.returnCode;
 			}
-			returnOperatorMenuJson();
+			returnMenuJson();
 		}catch (Exception e){
 			log.error(e.getMessage(),e);
 			returnCode = ReturnCodeUtil.returnCode2;
-			returnOperatorMenuJson();
+			returnMenuJson();
 		}finally {
 			PubModelUtil.apiRecordBean(map,"AU030",json,jb.toString());
 		}
@@ -520,16 +518,6 @@ public class MenuAuthController extends Controller{
 		renderJson(jb);
 	}
 
-	public void returnOperatorMenuJson(){
-		returnMessage = JsonUtil.getDictName(dictList,returnCode);
-		jyau_menuData.put("req_no",reqNo);
-		jyau_menuData.put("operator_id",operatorId);
-		jyau_menuData.put("menu_list",menuList);
-		jsonArray.add(jyau_menuData);
-		jb = JsonUtil.returnJson(jsonArray,returnCode,returnMessage);
-		renderJson(jb);
-	}
-
 	public void returnJson(){
 		returnMessage = JsonUtil.getDictName(dictList,returnCode);
 		jyau_menuData.put("req_no",reqNo);
@@ -569,7 +557,8 @@ public class MenuAuthController extends Controller{
 	// 根据角色ID查询对应的菜单机构
 	private void  getDetailInfoByRole(String roleId){
 		allOrg = AuOrganizationDao.dao.findAll();//所有机构
-		multiLevelMenu();//所有菜单列表，封装在resultList
+		List<Record> menuList = AuMenuDao.dao.queryMenu();
+		multiLevelMenu(menuList);//所有菜单列表，封装在resultList
 		menuByRoleList = AuMenuOrgDao.dao.findMenuByRole(roleId);
 		for (Record menu : menuByRoleList){
 			String menuId = menu.getStr("menu_id");
@@ -596,17 +585,22 @@ public class MenuAuthController extends Controller{
 		return orgArray;
 	}
 	//多级菜单的查询
-	public void multiLevelMenu( ){
-		List<Record> menuList = AuMenuDao.dao.queryMenu();
+	public void multiLevelMenu(List<Record> menuList ){
 		List<MenuBean> mbList = new ArrayList<>();
 		for(int i=0;i<menuList.size();i++){
+			String menuAction = "";
+			String mAction = menuList.get(i).getStr("menu_action");
+			if(EmptyUtils.isNotEmpty(mAction)){
+				String preFix = JsonUtil.getDictName(actionList,"url");
+				menuAction = preFix + mAction;
+			}
 			MenuBean mb = new MenuBean();
 			mb.setMenu_id(menuList.get(i).getStr("menu_id"));
 			mb.setName(menuList.get(i).getStr("menu_name"));
+			mb.setAction(menuAction);
 			mb.setParent_id(menuList.get(i).getStr("parent_id"));
 			mbList.add(mb);
 		}
-
 		//获取顶层元素集合
 		for (MenuBean entity : mbList) {
 			String parentId=entity.getParent_id();
@@ -641,6 +635,53 @@ public class MenuAuthController extends Controller{
 			return null;
 		}
 		return childList;
+	}
+
+	/**
+	 * 说明方法描述：递归找出本节点和他们的父节点
+	 *
+	 * @param parentList 根据关键字过滤出来的相关节点的父节点
+	 * @param resultList 返回的过滤出来的节点
+	 * @param filterRecordMap 已经过滤出来的节点
+	 * @param allRecordMap 所有节点
+	 * @return
+	 */
+	private List<Record> getSelfAndTheirParentRecord(List<Record> parentList, List<Record> resultList,
+													 Map<String, Record> filterRecordMap,
+													 Map<String, Record> allRecordMap) {
+		// 当父节点为null或者节点数量为0时返回结果，退出递归
+		if (parentList == null || parentList.size() == 0) {
+			return resultList;
+		}
+		// 重新创建父节点集合
+		List<Record> listParentRecord = new ArrayList<Record>();
+		// 遍历已经过滤出来的节点
+		for (Record record : parentList) {
+			String menuId = record.getStr("menu_id");
+			String parentId = record.getStr("parent_id");
+
+			// 如果已经过滤出来的节点不存在则添加到list中
+			if (!filterRecordMap.containsKey(menuId)) {
+				listParentRecord.add(record);// 添加到父节点中
+				filterRecordMap.put(menuId, record);// 添加到已过滤的map中
+				allRecordMap.remove(menuId);// 移除集合中相应的元素
+				resultList.add(record);// 添加到结果集中
+			}
+
+			// 找出本节点的父节点并添加到listParentRecord父节点集合中，并移除集合中相应的元素
+			if (EmptyUtils.isNotEmpty(parentId)) {
+				Record parentRecord = allRecordMap.get(parentId);
+				if (parentRecord != null) {
+					listParentRecord.add(parentRecord);
+					allRecordMap.remove(parentId);
+				}
+			}
+
+		}
+		// 递归调用
+		getSelfAndTheirParentRecord(listParentRecord, resultList, filterRecordMap, allRecordMap);
+
+		return resultList;
 	}
 
 }

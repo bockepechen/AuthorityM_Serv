@@ -7,9 +7,20 @@ import java.util.List;
  */
 public class MenuBean{
 	public String menu_id;
+
 	public String name;
+
 	public String parent_id;
+	public String action;
 	public List<MenuBean> child_list;
+
+	public String getAction() {
+		return action;
+	}
+
+	public void setAction(String action) {
+		this.action = action;
+	}
 
 	public String getMenu_id() {
 		return menu_id;
