@@ -587,12 +587,14 @@ public class MenuAuthController extends Controller {
 	public void multiLevelMenu(List<Record> menuList) {
 		List<MenuBean> mbList = new ArrayList<>();
 		for (int i = 0; i < menuList.size(); i++) {
-			String menuAction = "";
+			String menuAction = menuList.get(i).getStr("menu_action");//修改--不需拼接
+			//拼接url前缀
+			/*String menuAction = "";
 			String mAction = menuList.get(i).getStr("menu_action");
 			if (EmptyUtils.isNotEmpty(mAction)) {
 				String preFix = JsonUtil.getDictName(actionList, "url");
 				menuAction = preFix + mAction;
-			}
+			}*/
 			MenuBean mb = new MenuBean();
 			mb.setMenu_id(menuList.get(i).getStr("menu_id"));
 			mb.setName(menuList.get(i).getStr("menu_name"));

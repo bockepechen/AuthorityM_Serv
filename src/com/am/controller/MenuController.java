@@ -189,14 +189,15 @@ public class MenuController extends Controller{
 					menuName = menuRecord.getStr("MU_NAME");
 					menuCode = menuRecord.getStr("MU_CODE");
 					ifLeaf = menuRecord.getStr("MU_IFLEAF");
-					String mAction  = menuRecord.getStr("MU_ACTION");
+					String mAction  = menuRecord.getStr("MU_ACTION");//拼接url前缀
+					menuAction  = menuRecord.getStr("MU_ACTION");//修改-不需拼接
 					if(null != menuRecord.getInt("MU_DISPLAYORDER")){
 						displayOrder = menuRecord.getInt("MU_DISPLAYORDER").toString();
 					}
-					if(EmptyUtils.isNotEmpty(mAction)){
+					/*if(EmptyUtils.isNotEmpty(mAction)){//拼接url前缀
 						String preFix = JsonUtil.getDictName(actionList,"url");
 						menuAction = preFix + mAction;
-					}
+					}*/
 				}
 				returnCode = ReturnCodeUtil.returnCode;
 			}
