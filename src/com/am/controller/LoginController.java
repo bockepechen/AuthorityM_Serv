@@ -41,9 +41,9 @@ public class LoginController extends Controller {
 	public void index() {
 
 		//获取请求数据
-		String json = HttpKit.readData(getRequest());
+		// String json = HttpKit.readData(getRequest());
 
-		/*String json = "{\n" +
+		String json = "{\n" +
 				"\t\"jyau_content\": {\n" +
 				"\t\t\"jyau_reqData\": [{\n" +
 				"\t\t\t\"req_no\": \" AU001201810231521335687\",\n" +
@@ -56,7 +56,7 @@ public class LoginController extends Controller {
 				"\t\t\t\"system_id\": \"10909\"\n" +
 				"\t\t}\n" +
 				"\t}\n" +
-				"}";*/
+				"}";
 		//解析Json
 		Map map = new HashMap();
 		try {
@@ -73,6 +73,7 @@ public class LoginController extends Controller {
 				returnCode = loginMap.get("returnCode").toString();
 				if(returnCode.equals("0000")) {
 					operatorId = loginMap.get("operatorId").toString();
+					setSessionAttr("userId",operatorId);
 					name = loginMap.get("name").toString();
 					if (null != loginMap.get("lastIp")) {
 						lastIp = loginMap.get("lastIp").toString();
@@ -105,5 +106,19 @@ public class LoginController extends Controller {
 		jsonArray.add(jyau_loginData);
 		jb = JsonUtil.returnJson(jsonArray, returnCode, returnMessage);
 		renderJson(jb);
+	}
+
+	public void wskts(){
+		render("/login.jsp");
+	}
+
+	public void wskt(){
+		render("/testLogin.jsp");
+	}
+
+	public void login(){
+		setSessionAttr("userId",getPara("userName"));
+		// render("/sendMsg.jsp");
+		render("/sendMsgTest.jsp");
 	}
 }

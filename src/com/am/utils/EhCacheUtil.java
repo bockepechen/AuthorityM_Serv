@@ -3,6 +3,7 @@ package com.am.utils;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.am.bean.WebSocketMsg;
 import com.jfinal.kit.Prop;
 import com.jfinal.kit.PropKit;
 import com.jfinal.plugin.activerecord.Db;
@@ -23,6 +24,19 @@ public class EhCacheUtil {
         // 缓存加载动态SQL数据
         loadDynamicData();
     }
+
+
+    /**
+     * webSocket 加载缓存
+     * @param userId 用户ID
+     * @param list 未发送的消息
+     */
+    public static void loadDynamicSocketData(String userId, List<WebSocketMsg> list){
+        // 清除旧缓存
+        CacheKit.remove("dataSocketCache",userId);
+        CacheKit.put("dataSocketCache", userId, list);
+    }
+
     /**
      *	缓存加载动态SQL数据
      */

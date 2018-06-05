@@ -3,6 +3,7 @@ package com.am.common;
 import com.alibaba.druid.filter.stat.StatFilter;
 import com.alibaba.druid.wall.WallFilter;
 import com.am.controller.*;
+import com.am.socket.WebSocketHandler;
 import com.am.utils.EhCacheUtil;
 import com.jfinal.config.*;
 import com.jfinal.kit.PathKit;
@@ -85,10 +86,10 @@ public class CommonConfig extends JFinalConfig {
 		me.add("/login", LoginController.class);
 		me.add("/operator", OperatorController.class);
 		me.add("/emporg", OrgEmpManageController.class);
-		me.add("/org",OrgController.class);
-		me.add("/role",RoleController.class);
-		me.add("/menu",MenuController.class);
-		me.add("/menuAuth",MenuAuthController.class);
+		me.add("/org", OrgController.class);
+		me.add("/role", RoleController.class);
+		me.add("/menu", MenuController.class);
+		me.add("/menuAuth", MenuAuthController.class);
 
 	}
 
@@ -120,7 +121,8 @@ public class CommonConfig extends JFinalConfig {
 	 * 配置处理器
 	 */
 	public void configHandler(Handlers me) {
-		log.info("配置处理器开始..");
+		me.add(new WebSocketHandler("^/websocket"));
+		log.info("配置处理器开始..>>>");
 	}
 
 

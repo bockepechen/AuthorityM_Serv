@@ -95,4 +95,13 @@ public class AuOperatorDao implements IBaseDao{
 		String sql = "SELECT * FROM AU_OPERATOR WHERE OP_ACCOUNT = ?  AND OP_STATUS = '01'";
 		return Db.use(configName).findFirst(sql,accountId);
 	}
+
+	/**
+	 * 查询所有用户的ID
+	 * @return
+	 */
+	public List<Record> findAllId(){
+		String sql = "SELECT ot.OP_OPRATORID AS operator_id  FROM AU_OPERATOR ot";
+		return Db.use(configName).find(sql);
+	}
 }
