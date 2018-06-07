@@ -41,22 +41,22 @@ public class LoginController extends Controller {
 	public void index() {
 
 		//获取请求数据
-		String json = HttpKit.readData(getRequest());
+		// String json = HttpKit.readData(getRequest());
 
-		/*String json = "{\n" +
+		String json = "{\n" +
 				"\t\"jyau_content\": {\n" +
 				"\t\t\"jyau_reqData\": [{\n" +
 				"\t\t\t\"req_no\": \" AU001201810231521335687\",\n" +
-				"\t\t\t\"account_pwd\": \"6fdefAERTYP\"\n" +
+				"\t\t\t\"account_pwd\": \"111111\"\n" +
 				"\t\t}],\n" +
 				"\t\t\"jyau_pubData\": {\n" +
 				"\t\t\t\"operator_id\": \"\",\n" +
-				"\t\t\t\"account_id\": \"systemman\",\n" +
+				"\t\t\t\"account_id\": \"zhangguobang\",\n" +
 				"\t\t\t\"ip_address\": \"10.2.0.116\",\n" +
 				"\t\t\t\"system_id\": \"10909\"\n" +
 				"\t\t}\n" +
 				"\t}\n" +
-				"}";*/
+				"}";
 		//解析Json
 		Map map = new HashMap();
 		try {

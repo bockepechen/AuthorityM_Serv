@@ -3,6 +3,9 @@ package com.am.controller;
 import com.am.bean.WebSocketMsg;
 import com.am.dao.AuOperatorDao;
 import com.am.socket.HttpSessionConfigurator;
+import com.am.socket.ServerEncoder;
+import com.am.utils.DatabaseUtil;
+import com.am.utils.JsonUtil;
 import com.jfinal.log.Log;
 import com.jfinal.plugin.ehcache.CacheKit;
 import com.jfinal.plugin.activerecord.Record;
@@ -27,7 +30,7 @@ import javax.websocket.server.ServerEndpoint;
  * 注解的值将被用于监听用户连接的终端访问URL地址,客户端可以通过这个URL来连接到WebSocket服务器端，
  * 以{}为标志的字段，是用于接收http请求所携带的参数
  */
-@ServerEndpoint(value = "/websocket/{userId}/{receiveId}/{msgType}", configurator = HttpSessionConfigurator.class)
+@ServerEndpoint(value = "/websocket/{userId}/{receiveId}/{msgType}", configurator = HttpSessionConfigurator.class,encoders = ServerEncoder.class)
 public class WebSocketController {
 	static Log log = Log.getLog(WebSocketController.class);
 	// 静态变量，用来记录当前在线连接数。应该把它设计成线程安全的。
@@ -50,14 +53,20 @@ public class WebSocketController {
 		if(null == httpSession) {
 
 		}else {
-			// String user = httpSession.getAttribute("userId").toString();
-			// log.info("***************" + user);
+			String operateId = (String) httpSession.getAttribute("userId");
+			log.info("***************" + operateId);
 			this.session = session;
-			webSocketMap.put(userId, this); // 放入map中
-			addOnlineCount(); // 在线数加
-			log.info("有新连接加入！当前在线人数为" + getOnlineCount() + "\nID分别为：");
-			// 获得这个用户的离线信息并发送出去
-			getLeaveMsgSend(userId);
+			// 判断websocket 是否已经含有同一个userId
+			if(webSocketMap.get(userId) != null){
+
+			}else{
+				webSocketMap.put(userId, this); // 放入map中
+				addOnlineCount(); // 在线数加
+				log.info("有新连接加入！当前在线人数为" + getOnlineCount() + "\nID分别为：");
+				// 获得这个用户的离线信息并发送出去
+				getLeaveMsgSend(userId);
+			}
+
 
 		}
 	}
@@ -74,7 +83,7 @@ public class WebSocketController {
 						for (int i = 0; i < listMsg.size(); i++) {
 							WebSocketMsg msg = listMsg.get(i);
 							//存在离线的消息
-							boolean falg = sendLeaveMsg(msg.getMsgContent(), "1", key);
+							boolean falg = sendLeaveMsg(msg.getMsgContent(), "1", msg.getMsgSender(),key,msg.getMsgSendDate());
 							if (falg) {
 								listMsg.remove(msg);
 							}
@@ -133,7 +142,7 @@ public class WebSocketController {
 			if(!"0".equals(userId) && !"0".equals(receiveId)) { // 单个用户推送
 				sendMsgById(message, userId, receiveId,msgType);
 			} else if("0".equals(userId) && "0".equals(receiveId)) {  // 群发消息
-				sendMsgToOnLine(message,msgType);
+				sendMsgToOnLine(message,msgType,userId);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -163,25 +172,27 @@ public class WebSocketController {
 	}
 
 	/**
-	 *
+	 * 发送信息
 	 * @param message
-	 * @param userId
-	 * @param receiveId
-	 * @param msgType
+	 * @param userId 发送者
+	 * @param receiveId 接收者
+	 * @param msgType 信息类型
 	 * @throws IOException
 	 */
 	public void sendMsgById(String message, String userId, String receiveId,String msgType) throws IOException{
+
+		String dateStr = DatabaseUtil.getDateStr(new Date(),"yyyy-mm-dd hh:MM:ss");
 		if(webSocketMap.containsKey(receiveId)){
-			webSocketMap.get(receiveId).sendMessage(message);
-			webSocketMap.get(userId).sendMessage("消息发送成功");
+			webSocketMap.get(receiveId).sendMessage(message,msgType,userId,receiveId,dateStr);
+			// webSocketMap.get(userId).sendMessage("消息发送成功");
 		} else {
-			webSocketMap.get(userId).sendMessage("该用户不存在或已离线");
+			webSocketMap.get(userId).sendMessage("用户:" + receiveId + "不存在或已离线");
 			//必须发送的信息
 			if(msgType == "1" || msgType.equals("1")){
 				// 添加到缓存
-				addLeaveMsg(receiveId,message);
+				addLeaveMsg(receiveId,message,userId,dateStr,msgType);
 			}
-			webSocketMap.get(userId).sendMessage("该离线用户信息已经保存");
+			// webSocketMap.get(userId).sendMessage("该离线用户信息已经保存");
 
 		}
 	}
@@ -194,13 +205,14 @@ public class WebSocketController {
 	 * @return
 	 * @throws IOException
 	 */
-	public boolean sendLeaveMsg(String message, String userId, String receiveId) throws  IOException{
+	public boolean sendLeaveMsg(String message, String msgType, String userId, String receiveId,String sendDate) throws  IOException{
 		if(webSocketMap.containsKey(receiveId)){
-			webSocketMap.get(receiveId).sendMessage(message);
-			webSocketMap.get(userId).sendMessage("消息发送成功");
+			// webSocketMap.get(receiveId).sendMessage(message);
+			// webSocketMap.get(userId).sendMessage("消息发送成功");
+			webSocketMap.get(receiveId).sendMessage(message,msgType,userId,receiveId,sendDate);
 			return true;
 		} else {
-			webSocketMap.get(userId).sendMessage("该用户不存在或已离线");
+			// webSocketMap.get(userId).sendMessage("该用户不存在或已离线");
 			return false;
 		}
 	}
@@ -219,19 +231,22 @@ public class WebSocketController {
 	/**
 	 * 给在线的人发送短信
 	 * @param message
+	 * @param messageType 消息类型
+	 * @param sender 发送者
 	 * @throws IOException
 	 */
-	public void sendMsgToOnLine(String message,String messageType) throws IOException{
+	public void sendMsgToOnLine(String message,String messageType,String sender) throws IOException{
+		String dateStr = DatabaseUtil.getDateStr(new Date(),"yyyy-mm-dd hh:MM:ss");
 		List<Record> userList = AuOperatorDao.dao.findAllId();
 		for(String key : webSocketMap.keySet()) {
-			webSocketMap.get(key).sendMessage(message);
+			webSocketMap.get(key).sendMessage(message,messageType,sender,key,dateStr);
 			// 必须发送的消息
 			if(messageType.equals("1")){
 				if(userList.contains(key)){
 
 				}else {
 					// 添加到缓存
-					addLeaveMsg(key,message);
+					addLeaveMsg(key,message,sender,dateStr,messageType);
 				}
 			}
 
@@ -239,8 +254,15 @@ public class WebSocketController {
 
 	}
 
-	// 将没有收到信息的放到该用户的缓存中
-	private void addLeaveMsg(String userId,String message){
+
+	/**
+	 * 将没有收到信息的放到该用户的缓存中
+	 * @param userId 接收者
+	 * @param message 内容
+	 * @param sender 发送者
+	 * @param sendDate 发送日期
+	 */
+	private void addLeaveMsg(String userId,String message,String sender,String sendDate,String msgType){
 		// 添加到缓存
 		List<WebSocketMsg> list = CacheKit.get("dataSocketCache", userId);
 		int size = 0;
@@ -254,10 +276,37 @@ public class WebSocketController {
 		WebSocketMsg socketMsg = new WebSocketMsg();
 		socketMsg.setMsgContent(message);
 		socketMsg.setMsgId(size + "");
-		socketMsg.setMsgSendDate(new Date());
+		socketMsg.setMsgSendDate(sendDate);
+		socketMsg.setMsgType(msgType);
+		socketMsg.setMsgReceiver(userId);
+		socketMsg.setMsgSender(sender);
 		list.add(socketMsg);
 		CacheKit.remove("dataSocketCache",userId);
 		CacheKit.put("dataSocketCache",userId,list);
+	}
+
+
+	/**
+	 * 消息发送
+	 * @param message
+	 * @param msgType
+	 * @param msgSender
+	 * @param msgReceiver
+	 * @param msgSendDate
+	 * @throws IOException
+	 */
+	public void sendMessage(String message,String msgType,String msgSender,String msgReceiver,String msgSendDate) throws IOException{
+		WebSocketMsg bean = new WebSocketMsg();
+		String dateStr = DatabaseUtil.getDateStr(new Date(),"yyyy-mm-dd hh:MM:ss");
+		bean.setMsgContent(message);
+		bean.setMsgSendDate(msgSendDate);
+		bean.setMsgSender(msgSender);
+		bean.setMsgType(msgType);
+		bean.setMsgReceiver(msgReceiver);
+		bean.setMsgReceiveDate(dateStr);
+		String json = JsonUtil.Object2Json(bean);
+
+		this.session.getBasicRemote().sendText(json);
 	}
 
 	/**
