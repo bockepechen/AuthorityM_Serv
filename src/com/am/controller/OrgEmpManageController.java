@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.am.dao.AuEmpOrgDao;
 import com.am.dao.AuOperatorDao;
 import com.am.dao.AuOrganizationDao;
+import com.am.dao.AuRoleDao;
 import com.am.service.OrgEmpRoleService;
 import com.am.utils.*;
 import com.jfinal.core.Controller;
@@ -581,13 +582,126 @@ public class OrgEmpManageController extends Controller{
 			PubModelUtil.apiRecordBean(map,"AU023",json,jb.toString());
 		}
 	}
+	//查询机构及对应的用户
+	public void queryOrgOperator(){
+		//获取请求数据
+		String json = HttpKit.readData(getRequest());
+		/*String json = "{\n" +
+				"\n" +
+				"\t\"jyau_content\": {\n" +
+				"\t\t\"jyau_reqData\": [{\n" +
+				"\t\t\t\"req_no\": \" AU001201810231521335687\"\n" +
+				"\t\t}],\n" +
+				"\t\t\"jyau_pubData\": {\n" +
+				"\t\t\t\"operator_id\": \"1\",\n" +
+				"\t\t\t\"account_id\": \"systemman\",\n" +
+				"\t\t\t\"ip_address\": \"10.2.0.116\",\n" +
+				"\t\t\t\"system_id\": \"10909\"\n" +
+				"\t\t}\n" +
+				"\t}\n" +
+				"}";*/
+		//解析Json
+		Map map = new HashMap();
+		try {
+			map = JsonUtil.analyzejson(json);
+			reqNo = map.get("req_no").toString();
+			accountId = map.get("account_id").toString();
+			operatorId = map.get("operator_id").toString();
+			if(EmptyUtils.isEmpty(reqNo) || EmptyUtils.isEmpty(accountId) || EmptyUtils.isEmpty(operatorId)){
+				returnCode = ReturnCodeUtil.returnCode3;
+			}else {
+				//查询机构
+				List<Record> orgList = AuOrganizationDao.dao.findAll();
+				//机构下用户
+				for(Record org : orgList){
+					String orgId = org.getStr("org_id");
+					String orgName = org.getStr("org_name");
+					List<Record>  empOrgList= AuEmpOrgDao.dao.findAllOperatorByOrgId(orgId);
+					JSONObject jo = new JSONObject();
+					jo.put("org_id",orgId);
+					jo.put("org_name",orgName);
+					jo.put("emp_list",empOrgList);
+					joo.add(jo);
+				}
+				returnCode = ReturnCodeUtil.returnCode;
+			}
+			returnJson();
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			returnCode = ReturnCodeUtil.returnCode2;
+			returnJson();
+		} finally {
+			PubModelUtil.apiRecordBean(map,"AU035",json,jb.toString());
+		}
+	}
 
+	//查询角色及对应的用户
+	public void queryRoleOperator(){
+		//获取请求数据
+		String json = HttpKit.readData(getRequest());
+		/*String json = "{\n" +
+				"\n" +
+				"\t\"jyau_content\": {\n" +
+				"\t\t\"jyau_reqData\": [{\n" +
+				"\t\t\t\"req_no\": \" AU001201810231521335687\"\n" +
+				"\t\t}],\n" +
+				"\t\t\"jyau_pubData\": {\n" +
+				"\t\t\t\"operator_id\": \"1\",\n" +
+				"\t\t\t\"account_id\": \"systemman\",\n" +
+				"\t\t\t\"ip_address\": \"10.2.0.116\",\n" +
+				"\t\t\t\"system_id\": \"10909\"\n" +
+				"\t\t}\n" +
+				"\t}\n" +
+				"}";*/
+		//解析Json
+		Map map = new HashMap();
+		try {
+			map = JsonUtil.analyzejson(json);
+			reqNo = map.get("req_no").toString();
+			accountId = map.get("account_id").toString();
+			operatorId = map.get("operator_id").toString();
+			if(EmptyUtils.isEmpty(reqNo) || EmptyUtils.isEmpty(accountId) || EmptyUtils.isEmpty(operatorId)){
+				returnCode = ReturnCodeUtil.returnCode3;
+			}else {
+				//查询角色
+				List<Record> roleList = AuRoleDao.dao.findAllRole();
+				//角色下用户
+				for(Record role : roleList){
+					String roleId = role.getStr("role_id");
+					String roleName = role.getStr("role_name");
+					List<Record>  empRoleList= AuEmpOrgDao.dao.findAllOperatorByRoleId(roleId);
+					JSONObject jo = new JSONObject();
+					jo.put("role_id",roleId);
+					jo.put("role_name",roleName);
+					jo.put("emp_list",empRoleList);
+					joo.add(jo);
+				}
+				returnCode = ReturnCodeUtil.returnCode;
+			}
+			returnRoleJson();
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			returnCode = ReturnCodeUtil.returnCode2;
+			returnRoleJson();
+		} finally {
+			PubModelUtil.apiRecordBean(map,"AU036",json,jb.toString());
+		}
+	}
 
 	public void returnJson() {
 		returnMessage = JsonUtil.getDictName(dictList, returnCode);
 		jyau_oporgData.put("req_no", reqNo);
 		jyau_oporgData.put("operator_id", operatorId);
 		jyau_oporgData.put("orgemp_list", joo);
+		jsonArray.add(jyau_oporgData);
+		jb = JsonUtil.returnJson(jsonArray, returnCode, returnMessage);
+		renderJson(jb);
+	}
+	public void returnRoleJson() {
+		returnMessage = JsonUtil.getDictName(dictList, returnCode);
+		jyau_oporgData.put("req_no", reqNo);
+		jyau_oporgData.put("operator_id", operatorId);
+		jyau_oporgData.put("roleemp_list", joo);
 		jsonArray.add(jyau_oporgData);
 		jb = JsonUtil.returnJson(jsonArray, returnCode, returnMessage);
 		renderJson(jb);

@@ -41,7 +41,7 @@ public class AuEmpOrgDao implements IBaseDao {
 	 * @return
 	 */
 	public  List<Record> findUserInOrg(String orgId){
-		String sql = "SELECT DISTINCT au.OP_OPRATORID AS operator_id,au.OP_NAME AS name FROM AU_OPERATOR au LEFT JOIN  AU_EMPORG ae ON au.OP_OPRATORID = ae.OP_OPRATORID WHERE ae.ORG_ID  = ?";
+			String sql = "SELECT DISTINCT au.OP_OPRATORID AS operator_id,au.OP_NAME AS name FROM AU_OPERATOR au , AU_EMPORG ae WHERE au.OP_OPRATORID = ae.OP_OPRATORID AND au.OP_STATUS = '01' AND ae.ORG_ID  = ?";
 		return Db.use(configName).find(sql,orgId);
 	}
 	/**
